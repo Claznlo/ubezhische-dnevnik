@@ -3,782 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Убежище Балдежа | Дневник активностей</title>
+    <title>Убежище Балдежа</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 30px 20px;
-            min-height: 100vh;
-        }
-        
-        .tabs { max-width: 1400px; margin: 0 auto; display: flex; gap: 5px; padding-left: 20px; }
-        .tab-btn {
-            background: #e9ecef;
-            border: none;
-            padding: 12px 28px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 15px 15px 0 0;
-            color: #495057;
-        }
-        .tab-btn.active {
-            background: white;
-            color: #1e3c72;
-        }
-        
-        .journal {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 0 20px 20px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .login-screen {
-            max-width: 450px;
-            margin: 100px auto;
-            background: white;
-            border-radius: 24px;
-            padding: 35px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .login-screen h2 { color: #1e3c72; margin-bottom: 25px; }
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #dee2e6;
-            border-radius: 12px;
-            font-size: 1em;
-        }
-        .login-btn, .guest-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .login-btn { background: #2a5298; color: white; }
-        .guest-btn { background: #6c757d; color: white; }
-        
-        .journal-header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            padding: 20px 35px;
-            border-bottom: 4px solid #ffd966;
-        }
-        .title-section {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        h1 { font-size: 1.8em; color: white; }
-        h1 small { font-size: 0.5em; opacity: 0.9; }
-        
-        .user-info {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .logout-btn, .theme-toggle {
-            background: rgba(255,255,255,0.25);
-            border: none;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-        
-        .stats-bar {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            background: rgba(255,255,255,0.1);
-            padding: 8px 15px;
-            border-radius: 50px;
-            margin-top: 10px;
-        }
-        .stat-item {
-            background: rgba(255,255,255,0.15);
-            padding: 5px 15px;
-            border-radius: 30px;
-            color: white;
-            font-size: 0.85em;
-        }
-        .stat-time {
-            background: rgba(255,255,255,0.25);
-            font-family: monospace;
-        }
-        
-        .admin-panel {
-            background: #f8f9fa;
-            padding: 20px 35px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .admin-title {
-            font-weight: 700;
-            color: #1e3c72;
-            margin-bottom: 15px;
-        }
-        .users-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .users-table th, .users-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .users-table th { background: #e9ecef; }
-        .role-select {
-            padding: 4px 8px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-        .delete-user-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .add-user-form {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-        .add-user-form input, .add-user-form select {
-            padding: 8px 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-        }
-        
-        .control-panel {
-            background: #f8f9fa;
-            padding: 20px 35px;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .control-group label {
-            font-size: 0.75em;
-            color: #6c757d;
-            text-transform: uppercase;
-        }
-        .control-group input {
-            padding: 8px 15px;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            width: 200px;
-        }
-        .btn {
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-success { background: #28a745; color: white; }
-        .btn-primary { background: #2a5298; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        
-        .players-section {
-            background: #f8f9fa;
-            padding: 15px 35px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .players-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .player-tag {
-            background: white;
-            padding: 6px 16px;
-            border-radius: 30px;
-            border: 1px solid #dee2e6;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .delete-player {
-            background: none;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-            font-size: 1.1em;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-            padding: 20px;
-        }
-        .diary-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .diary-table th, .diary-table td {
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            text-align: center;
-        }
-        .diary-table th { background: #f8f9fa; }
-        .diary-table td:first-child { text-align: left; font-weight: 600; }
-        .status-yes { background-color: #28a745 !important; color: white; }
-        .status-no { background-color: #dc3545 !important; color: white; }
-        .status-vacation { background-color: #6c757d !important; color: white; }
-        .status-left { background-color: #343a40 !important; color: white; }
-        .status-dash { background-color: #e9ecef !important; color: #495057; }
-        
-        .legend {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            display: flex;
-            gap: 20px;
-            font-size: 0.75em;
-            justify-content: center;
-            border-top: 1px solid #dee2e6;
-        }
-        .legend-color {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-right: 6px;
-            vertical-align: middle;
-        }
-        .date-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            padding: 0 20px 20px 20px;
-        }
-        .date-btn {
-            padding: 6px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-        .date-btn.add { background: #28a745; color: white; }
-        .date-btn.remove { background: #dc3545; color: white; }
-        .click-hint {
-            text-align: center;
-            font-size: 0.7em;
-            color: #6c757d;
-            padding: 5px 20px;
-            background: #f8f9fa;
-        }
-        .hidden { display: none; }
-        
-        .log-section {
-            background: #f8f9fa;
-            padding: 15px 35px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .log-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .log-title {
-            font-weight: 700;
-            color: #1e3c72;
-            font-size: 0.9em;
-        }
-        .log-list {
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 0.75em;
-            background: white;
-            border-radius: 12px;
-            padding: 8px;
-        }
-        .log-entry {
-            padding: 6px 10px;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .log-time {
-            color: #6c757d;
-            font-family: monospace;
-            font-size: 0.7em;
-            white-space: nowrap;
-        }
-        .empty-log {
-            text-align: center;
-            padding: 15px;
-            color: #6c757d;
-        }
-        
-        .status-popup {
-            position: fixed;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 12px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            min-width: 150px;
-            border: 1px solid #dee2e6;
-        }
-        .popup-status-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .popup-status-btn.yes { background: #28a745; color: white; }
-        .popup-status-btn.no { background: #dc3545; color: white; }
-        .popup-status-btn.vacation { background: #6c757d; color: white; }
-        .popup-status-btn.left { background: #343a40; color: white; }
-        .popup-status-btn.dash { background: #e9ecef; color: #495057; }
-        
-        .save-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 12px;
-            height: 12px;
-            background: #28a745;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .save-indicator.show { opacity: 1; }
-        .error-msg { color: #dc3545; margin-top: 10px; }
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+        .login-box { max-width: 300px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; }
+        input, button { width: 100%; padding: 8px; margin: 5px 0; }
+        button { background: #2a5298; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th:first-child, td:first-child { text-align: left; }
+        .status-yes { background: #28a745; color: white; }
+        .status-no { background: #dc3545; color: white; }
+        .status-vacation { background: #6c757d; color: white; }
+        .status-left { background: #343a40; color: white; }
+        .status-dash { background: #e9ecef; }
+        .header { background: #1e3c72; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .stats { margin: 15px 0; }
     </style>
 </head>
 <body>
-    <div id="app"></div>
-    <div class="save-indicator" id="saveIndicator"></div>
+<div id="app"></div>
 
-    <script>
-        // ========== ЛОКАЛЬНАЯ ВЕРСИЯ ==========
-        let users = [
-            { id: "admin_1", login: "Clanzlo_", password: "32707", role: "admin", name: "Clanzlo_", createdAt: new Date().toISOString() }
-        ];
-        let currentUser = null;
-        let PLAYERS = [];
-        let dates = [];
-        let matrix = [];
-        let actionLog = [];
-        
-        const STATUSES = ['dash', 'yes', 'no', 'vacation', 'left'];
-        const STATUS_NAMES = { dash: '—', yes: 'Да', no: 'Нет', vacation: 'Отпуск', left: 'Выбыл' };
-        const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-        
-        function formatDate(date) { return `${String(date.getDate()).padStart(2,'0')}.${String(date.getMonth()+1).padStart(2,'0')}`; }
-        function getWeekday(date) { return WEEKDAYS[date.getDay()]; }
-        function getSeason(date) { const m = date.getMonth(); if(m>=2&&m<=4) return '🌸 Весна'; if(m>=5&&m<=7) return '☀️ Лето'; if(m>=8&&m<=10) return '🍂 Осень'; return '❄️ Зима'; }
-        function formatFullDateTime() { const n=new Date(); return `${String(n.getDate()).padStart(2,'0')}.${String(n.getMonth()+1).padStart(2,'0')}.${n.getFullYear()} ${WEEKDAYS[n.getDay()]} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')} ${getSeason(n)}`; }
-        function escapeHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-        function generateDates() { const d=[]; const t=new Date(); for(let i=6;i>=0;i--) { const nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
-        
-        function showSaveIndicator() { const i=document.getElementById('saveIndicator'); if(i){i.classList.add('show'); setTimeout(()=>i.classList.remove('show'),1000);} }
-        
-        function saveAllData() {
-            const data = {
-                players: PLAYERS,
-                dates: dates.map(d => d.toISOString()),
-                matrix: matrix,
-                users: users,
-                logs: actionLog
-            };
-            localStorage.setItem('ubezhische_data', JSON.stringify(data));
-            showSaveIndicator();
+<script>
+    // ЛОКАЛЬНАЯ ВЕРСИЯ (сохраняет в браузере)
+    let currentUser = null;
+    let PLAYERS = [];
+    let dates = [];
+    let matrix = [];
+    
+    const STATUSES = ['dash', 'yes', 'no', 'vacation', 'left'];
+    const STATUS_NAMES = { dash: '—', yes: 'Да', no: 'Нет', vacation: 'Отпуск', left: 'Выбыл' };
+    const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    
+    function formatDate(d) { return `${d.getDate()}.${d.getMonth()+1}`; }
+    function getWeekday(d) { return WEEKDAYS[d.getDay()]; }
+    function generateDates() { let d=[]; let t=new Date(); for(let i=6;i>=0;i--) { let nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
+    
+    function saveToLocal() {
+        localStorage.setItem('ubezhische_data', JSON.stringify({
+            players: PLAYERS,
+            dates: dates.map(d=>d.toISOString()),
+            matrix: matrix
+        }));
+    }
+    
+    function loadFromLocal() {
+        const saved = localStorage.getItem('ubezhische_data');
+        if(saved) {
+            const data = JSON.parse(saved);
+            PLAYERS = data.players || [];
+            dates = (data.dates || []).map(d=>new Date(d));
+            matrix = data.matrix || [];
         }
-        
-        function loadAllData() {
-            const saved = localStorage.getItem('ubezhische_data');
-            if(saved) {
-                const data = JSON.parse(saved);
-                PLAYERS = data.players || [];
-                dates = (data.dates || []).map(d => new Date(d));
-                matrix = data.matrix || [];
-                if(data.users) users = data.users;
-                if(data.logs) actionLog = data.logs;
-            }
-            if(dates.length === 0) dates = generateDates();
-            if(matrix.length !== PLAYERS.length && PLAYERS.length > 0) {
-                matrix = PLAYERS.map(() => dates.map(() => 'dash'));
-            }
-            if(matrix[0] && matrix[0].length !== dates.length && PLAYERS.length > 0) {
-                matrix = PLAYERS.map(() => dates.map(() => 'dash'));
-            }
-            renderLogs();
-        }
-        
-        function addLog(action, details) {
-            const now = new Date();
-            const timeStr = `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-            actionLog.unshift({ id: Date.now() + Math.random(), action, details, user: currentUser?.login || 'Наблюдатель', time: timeStr });
-            if(actionLog.length > 200) actionLog = actionLog.slice(0, 200);
-            saveAllData();
-            renderLogs();
-        }
-        
-        function clearLogs() {
-            actionLog = [];
-            saveAllData();
-            renderLogs();
-            addLog('Очистка', 'История действий очищена');
-        }
-        
-        function exportLogs() {
-            let text = '=== УБЕЖИЩЕ БАЛДЕЖА ===\n=== ИСТОРИЯ ДЕЙСТВИЙ ===\n\n';
-            actionLog.forEach(e => { text += `[${e.time}] ${e.user}: ${e.action} — ${e.details}\n`; });
-            const blob = new Blob([text], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `ubezhische_log_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-        }
-        
-        function renderLogs() {
-            const container = document.getElementById('logList');
-            if(!container) return;
-            if(actionLog.length === 0) {
-                container.innerHTML = '<div class="empty-log">История пуста</div>';
-                return;
-            }
-            container.innerHTML = '';
-            actionLog.forEach(entry => {
-                const div = document.createElement('div');
-                div.className = 'log-entry';
-                div.innerHTML = `<span>📌 ${escapeHtml(entry.user)}: ${escapeHtml(entry.action)} — ${escapeHtml(entry.details)}</span><span class="log-time">${escapeHtml(entry.time)}</span>`;
-                container.appendChild(div);
-            });
-        }
-        
-        function renderPlayersList() {
-            const container = document.getElementById('playersList');
-            if(!container) return;
-            if(PLAYERS.length === 0) {
-                container.innerHTML = '<span style="color:#6c757d;">Нет игроков</span>';
-                return;
-            }
-            container.innerHTML = PLAYERS.map((p,i)=>`<span class="player-tag">${escapeHtml(p)} ${currentUser?.role !== 'viewer' ? '<button class="delete-player" data-index="'+i+'">✖</button>' : ''}</span>`).join('');
-            if(currentUser?.role !== 'viewer') {
-                document.querySelectorAll('.delete-player').forEach(btn => {
-                    btn.onclick = () => deletePlayer(parseInt(btn.dataset.index));
-                });
-            }
-        }
-        
-        function renderTable() {
-            const thead = document.getElementById('tableHead');
-            const tbody = document.getElementById('tableBody');
-            if(!thead || !tbody) return;
-            
-            thead.innerHTML = ` <th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br><span style="font-size:0.7em;">${getWeekday(d)}</span></th>`).join('')}`;
-            
-            if(PLAYERS.length === 0) {
-                tbody.innerHTML = `<td colspan="${dates.length+1}" class="empty-message">Нет игроков</td>`;
-                return;
-            }
-            
-            tbody.innerHTML = PLAYERS.map((p,i)=>`
-                <tr>
-                    <td style="font-weight:600;">${escapeHtml(p)}</td>
-                    ${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}
-                </tr>
-            `).join('');
-        }
-        
-        function renderUsersTab() {
-            const container = document.getElementById('usersTab');
-            if(!container) return;
-            
-            container.innerHTML = `
-                <div class="admin-panel">
-                    <div class="admin-title">👥 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</div>
-                    <table class="users-table">
-                        <thead><tr><th>Логин</th><th>Роль</th><th>Создан</th><th></th></tr></thead>
-                        <tbody id="usersList"></tbody>
-                    </table>
-                    <div class="add-user-form">
-                        <input type="text" id="newUserLogin" placeholder="Логин">
-                        <input type="password" id="newUserPassword" placeholder="Пароль">
-                        <select id="newUserRole"><option value="editor">Редактор</option><option value="admin">Администратор</option></select>
-                        <button class="btn btn-success" id="createUserBtn">➕ Создать</button>
-                    </div>
+        if(dates.length===0) dates = generateDates();
+        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) matrix = PLAYERS.map(()=>dates.map(()=>'dash'));
+        render();
+    }
+    
+    function render() {
+        if(!currentUser) {
+            document.getElementById('app').innerHTML = `
+                <div class="login-box">
+                    <h2>📖 Убежище Балдежа</h2>
+                    <input type="text" id="login" placeholder="Логин">
+                    <input type="password" id="password" placeholder="Пароль">
+                    <button id="loginBtn">Войти</button>
+                    <button id="guestBtn">👀 Наблюдатель</button>
+                    <div id="error" style="color:red; margin-top:10px;"></div>
                 </div>
             `;
-            
-            function renderUsers() {
-                const list = document.getElementById('usersList');
-                if(!list) return;
-                list.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${escapeHtml(u.login)}</td>
-                        <td><select class="role-select" data-id="${u.id}"><option ${u.role==='admin'?'selected':''}>admin</option><option ${u.role==='editor'?'selected':''}>editor</option></select></td>
-                        <td>${u.createdAt?.slice(0,10)||'—'}</td>
-                        <td><button class="delete-user-btn" data-id="${u.id}">🗑 Удалить</button></td>
-                    </tr>
-                `).join('');
-                
-                document.querySelectorAll('.role-select').forEach(sel => {
-                    sel.onchange = () => {
-                        const user = users.find(u => u.id === sel.dataset.id);
-                        if(user && user.id !== users[0].id) {
-                            user.role = sel.value;
-                            saveAllData();
-                            addLog('Изменение роли', `${user.login} → ${user.role}`);
-                            renderUsers();
-                        }
-                    };
-                });
-                
-                document.querySelectorAll('.delete-user-btn').forEach(btn => {
-                    btn.onclick = () => {
-                        const user = users.find(u => u.id === btn.dataset.id);
-                        if(user && user.id !== users[0].id && confirm(`Удалить ${user.login}?`)) {
-                            users = users.filter(u => u.id !== user.id);
-                            saveAllData();
-                            addLog('Удаление пользователя', user.login);
-                            if(currentUser?.id === user.id) {
-                                localStorage.removeItem('ubezhische_user');
-                                currentUser = null;
-                                render();
-                            } else {
-                                renderUsers();
-                            }
-                        }
-                    };
-                });
-            }
-            
-            document.getElementById('createUserBtn').onclick = () => {
-                const login = document.getElementById('newUserLogin').value.trim();
-                const password = document.getElementById('newUserPassword').value;
-                const role = document.getElementById('newUserRole').value;
-                if(!login || !password) { alert('Заполните логин и пароль'); return; }
-                if(users.find(u => u.login === login)) { alert('Логин уже существует'); return; }
-                const newUser = { id: Date.now().toString(), login, password, role, name: login, createdAt: new Date().toISOString() };
-                users.push(newUser);
-                saveAllData();
-                addLog('Создание пользователя', `${login} (${role})`);
-                renderUsers();
-                document.getElementById('newUserLogin').value = '';
-                document.getElementById('newUserPassword').value = '';
+            document.getElementById('loginBtn').onclick = () => {
+                if(document.getElementById('login').value === 'Clanzlo_' && document.getElementById('password').value === '32707') {
+                    currentUser = { login: 'Clanzlo_', role: 'admin' };
+                    loadFromLocal();
+                } else {
+                    document.getElementById('error').innerText = 'Неверный логин или пароль';
+                }
             };
-            
-            renderUsers();
+            document.getElementById('guestBtn').onclick = () => {
+                currentUser = { login: 'Наблюдатель', role: 'viewer' };
+                loadFromLocal();
+            };
+            return;
         }
         
-        async function addPlayer() {
-            const name = document.getElementById('newPlayerName')?.value.trim();
-            if(!name) return alert('Введите ник');
-            PLAYERS.push(name);
-            matrix.push(dates.map(()=>'dash'));
-            saveAllData();
-            addLog('Добавление игрока', name);
-            renderPlayersList();
-            renderTable();
-            document.getElementById('newPlayerName').value = '';
-        }
+        const isViewer = currentUser.role === 'viewer';
         
-        async function deletePlayer(i) {
-            if(confirm(`Удалить ${PLAYERS[i]}?`)) {
-                const name = PLAYERS[i];
-                PLAYERS.splice(i,1);
-                matrix.splice(i,1);
-                saveAllData();
-                addLog('Удаление игрока', name);
-                renderPlayersList();
-                renderTable();
-            }
-        }
-        
-        async function addDay() {
-            const last = dates[dates.length-1];
-            const newDate = last ? new Date(last) : new Date();
-            if(last) newDate.setDate(last.getDate()+1);
-            dates.push(newDate);
-            PLAYERS.forEach((_,i)=> { if(matrix[i]) matrix[i].push('dash'); else matrix[i]=['dash']; });
-            saveAllData();
-            addLog('Добавление дня', formatDate(newDate));
-            renderTable();
-        }
-        
-        async function removeDay() {
-            if(dates.length<=1) return alert('Нельзя удалить последний день');
-            const removed = formatDate(dates[dates.length-1]);
-            dates.pop();
-            PLAYERS.forEach((_,i)=> matrix[i].pop());
-            saveAllData();
-            addLog('Удаление дня', removed);
-            renderTable();
-        }
-        
-        let activePopup = null;
-        async function handleCellClick(e) {
-            const td = e.target;
-            if(td.tagName !== 'TD' || td.cellIndex === 0 || currentUser?.role === 'viewer') return;
-            const playerIdx = parseInt(td.dataset.player);
-            const dayIdx = parseInt(td.dataset.day);
-            if(isNaN(playerIdx)||isNaN(dayIdx)) return;
-            if(activePopup) activePopup.remove();
-            
-            const rect = td.getBoundingClientRect();
-            const popup = document.createElement('div');
-            popup.className = 'status-popup';
-            [
-                { id:'dash', label:'➖ —', color:'dash' },
-                { id:'yes', label:'✅ Да (отписался)', color:'yes' },
-                { id:'no', label:'❌ Нет (не отписался)', color:'no' },
-                { id:'vacation', label:'✈️ Отпуск', color:'vacation' },
-                { id:'left', label:'💀 Выбыл', color:'left' }
-            ].forEach(s=>{
-                const btn = document.createElement('button');
-                btn.className = `popup-status-btn ${s.color}`;
-                btn.textContent = s.label;
-                btn.onclick = () => {
-                    const oldStatus = STATUS_NAMES[matrix[playerIdx][dayIdx]];
-                    matrix[playerIdx][dayIdx] = s.id;
-                    td.className = `status-${s.id}`;
-                    td.textContent = STATUS_NAMES[s.id];
-                    addLog('Изменение статуса', `${PLAYERS[playerIdx]} — ${oldStatus} → ${STATUS_NAMES[s.id]} (${formatDate(dates[dayIdx])})`);
-                    saveAllData();
-                    popup.remove();
-                    activePopup = null;
-                };
-                popup.appendChild(btn);
-            });
-            document.body.appendChild(popup);
-            activePopup = popup;
-            
-            let left = rect.right+10, top = rect.top;
-            if(left+popup.offsetWidth > window.innerWidth) left = rect.left - popup.offsetWidth - 10;
-            if(top+popup.offsetHeight > window.innerHeight) top = rect.bottom - popup.offsetHeight;
-            popup.style.cssText = `left:${left}px;top:${Math.max(10,top)}px;`;
-            
-            const close = (e) => { if(!popup.contains(e.target)) { popup.remove(); activePopup=null; document.removeEventListener('click',close); } };
-            setTimeout(()=>document.addEventListener('click',close),0);
-        }
-        
-        function render() {
-            const app = document.getElementById('app');
-            if(!currentUser) {
-                app.innerHTML = `
-                    <div class="login-screen">
-                        <h2>📖 УБЕЖИЩЕ БАЛДЕЖА</h2>
-                        <input type="text" id="loginInput" class="login-input" placeholder="Логин">
-                        <input type="password" id="passwordInput" class="login-input" placeholder="Пароль">
-                        <button class="login-btn" id="loginBtn">Войти</button>
-                        <button class="guest-btn" id="guestBtn">👀 Войти как Наблюдатель</button>
-                        <div id="loginError" class="error-msg"></div>
-                    </div>
-                `;
-                document.getElementById('loginBtn').onclick = () => {
-                    const login = document.getElementById('loginInput').value;
-                    const pass = document.getElementById('passwordInput').value;
-                    const user = users.find(u => u.login === login && u.password === pass);
-                    if(user) {
-                        currentUser = { ...user, password: undefined };
-                        localStorage.setItem('ubezhische_user', JSON.stringify({ id: user.id, login: user.login, role: user.role }));
-                        render();
-                    } else {
-                        document.getElementById('loginError').innerText = 'Неверный логин или пароль';
-                    }
-                };
-                document.getElementById('guestBtn').onclick = () => {
-                    currentUser = { role: 'viewer', login: 'Наблюдатель' };
-                    render();
-                };
-                return;
-            }
-            
-            const isAdmin = currentUser.role === 'admin';
-            const isEditor = currentUser.role === 'editor' || isAdmin;
-            const isViewer = currentUser.role === 'viewer';
-            
-            app.innerHTML = `
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="diary">🏠 ДНЕВНИК</button>
-                    ${isAdmin ? '<button class="tab-btn" data-tab="users">👥 УПРАВЛЕНИЕ</button>' : ''}
+        let html = `
+            <div class="header">
+                <h1>📖 УБЕЖИЩЕ БАЛДЕЖА</h1>
+                <div>${currentUser.role === 'admin' ? '👑' : '👀'} ${currentUser.login} <button id="logoutBtn" style="background:rgba(255,255,255,0.3); border:none; color:white; padding:5px 10px;">Выйти</button></div>
+            </div>
+            <div style="padding:20px;">
+                ${!isViewer ? `
+                <div style="margin-bottom:20px;">
+                    <input type="text" id="newPlayer" placeholder="Никнейм игрока">
+                    <button id="addPlayerBtn">➕ Добавить игрока</button>
+                    <button id="addDayBtn">➕ Добавить день</button>
+                    <button id="removeDayBtn">✖️ Удалить день</button>
                 </div>
-                <div class="journal">
-                    <div class="journal-header">
-                        <div class="title-section">
-                            <h1>📖 УБЕЖИЩЕ БАЛДЕЖА <small>дневник активностей</small></h1>
-                            <div class="user-info">
-                                <span>${currentUser.role === 'admin' ? '👑' : (currentUser.role === 'editor' ? '✏️' : '👀')} ${escapeHtml(currentUser.login)}</span>
-                                <button class="theme-toggle" id="themeToggle">🌙</button>
-                                <button class="logout-btn" id="logoutBtn">🚪 Выйти</button>
-                                ${!isViewer ? '<button class="logout-btn" id="exportLogsBtn">📋 Экспорт логов</button>' : ''}
-                                ${!isViewer ? '<button class="logout-btn" id="clearLogsBtn">🗑 Очистить логи</button>' : ''}
-                            </div>
-                        </div>
-                        <div class="stats-bar">
-                            <div class="stat-item">👥 Игроков: ${PLAYERS.length}</div>
-                            <div class="stat-item">📅 Дней: ${dates.length}</div>
-                            <div class="stat-item stat-time">🕐 ${formatFullDateTime()}</div>
-                        </div>
-                    </div>
-                    <div id="diaryTab">
-                        ${!isViewer ? `
-                        <div class="control-panel">
-                            <div class="control-group"><label>➕ Добавить игрока</label><input type="text" id="newPlayerName" placeholder="Никнейм"></div>
-                            <button class="btn btn-success" id="addPlayerBtn">Добавить</button>
-                            <div class="control-group"><label>📅 Дни</label><div style="display:flex;gap:10px;"><button class="btn btn-primary" id="addDayBtn">+ День</button><button class="btn btn-danger" id="removeDayBtn">- День</button></div></div>
-                        </div>
-                        ` : ''}
-                        <div class="players-section"><div class="players-list" id="playersList"></div></div>
-                        <div class="table-container">
-                            <table class="diary-table">
-                                <thead id="tableHead"></thead>
-                                <tbody id="tableBody"></tbody>
-                            </table>
-                        </div>
-                        ${!isViewer ? `
-                        <div class="date-actions">
-                            <button class="date-btn add" id="addDayBottomBtn">➕ Добавить день</button>
-                            <button class="date-btn remove" id="removeDayBottomBtn">✖️ Удалить день</button>
-                        </div>
-                        ` : ''}
-                        <div class="legend">
-                            <div><span class="legend-color" style="background:#28a745;"></span> Да (отписался)</div>
-                            <div><span class="legend-color" style="background:#dc3545;"></span> Нет (не отписался)</div>
-                            <div><span class="legend-color" style="background:#6c757d;"></span> Отпуск</div>
-                            <div><span class="legend-color" style="background:#343a40;"></span> Выбыл</div>
-                            <div><span class="legend-color" style="background:#e9ecef;"></span> —</div>
-                        </div>
-                        <div class="click-hint">💡 КЛИКНИТЕ ПО ЯЧЕЙКЕ — появится меню выбора статуса</div>
-                    </div>
-                    <div id="usersTab" class="hidden"></div>
+                ` : ''}
+                <div class="stats">👥 Игроков: ${PLAYERS.length} | 📅 Дней: ${dates.length}</div>
+                <div style="overflow-x:auto;">
+                     <table>
+                        <thead> <tr><th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br>${getWeekday(d)}</th>`).join('')}</tr> </thead>
+                        <tbody>
+                            ${PLAYERS.map((p,i)=>`
+                                <tr>
+                                    <td>${p}</td>
+                                    ${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                     </table>
                 </div>
-                <div class="log-section">
-                    <div class="log-header">
-                        <div class="log-title">📋 ИСТОРИЯ ДЕЙСТВИЙ</div
+                <div style="margin-top:10px; font-size:12px; color:gray;">💡 Кликните по ячейке для изменения статуса</div>
+            </div>
+        `;
+        document.getElementById('app').innerHTML = html;
+        
+        if(!isViewer) {
+            document.getElementById('addPlayerBtn').onclick = () => {
+                const name = document.getElementById('newPlayer').value.trim();
+                if(!name) return alert('Введите ник');
+                PLAYERS.push(name);
+                matrix.push(dates.map(()=>'dash'));
+                saveToLocal();
+                render();
+                document.getElementById('newPlayer').value = '';
+            };
+            document.getElementById('addDayBtn').onclick = () => {
+                const last = dates[dates.length-1];
+                const newDate = last ? new Date(last) : new Date();
+                if(last) newDate.setDate(last.getDate()+1);
+                dates.push(newDate);
+                PLAYERS.forEach((_,i)=> matrix[i].push('dash'));
+                saveToLocal();
+                render();
+            };
+            document.getElementById('removeDayBtn').onclick = () => {
+                if(dates.length<=1) return alert('Нельзя удалить последний день');
+                dates.pop();
+                PLAYERS.forEach((_,i)=> matrix[i].pop());
+                saveToLocal();
+                render();
+            };
+        }
+        document.getElementById('logoutBtn').onclick = () => { currentUser=null; render(); };
+        
+        document.querySelectorAll('td[data-player]').forEach(td => {
+            td.onclick = () => {
+                const i = parseInt(td.dataset.player);
+                const j = parseInt(td.dataset.day);
+                const current = matrix[i][j];
+                const next = STATUSES[(STATUSES.indexOf(current)+1)%STATUSES.length];
+                matrix[i][j] = next;
+                saveToLocal();
+                render();
+            };
+        });
+    }
+    
+    loadFromLocal();
+</script>
+</body>
+</html>
