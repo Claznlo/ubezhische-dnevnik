@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Убежище Балдежа</title>
+    <title>Убежище Балдежа | Синхронизация</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: Arial; background: #f0f2f5; padding: 20px; }
         .login-box { max-width: 300px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; }
@@ -19,13 +21,27 @@
         .status-dash { background: #e9ecef; }
         .header { background: #1e3c72; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .stats { margin: 15px 0; }
+        .sync-status { font-size: 12px; margin-left: 10px; color: #ffd966; }
     </style>
 </head>
 <body>
 <div id="app"></div>
 
 <script>
-    // ЛОКАЛЬНАЯ ВЕРСИЯ (сохраняет в браузере)
+    // ========== FIREBASE КЛЮЧИ ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyBLFoSs5GJa80f37A8xAq4k6qNxiQ0KAMk",
+        authDomain: "ubezhische-sync.firebaseapp.com",
+        projectId: "ubezhische-sync",
+        storageBucket: "ubezhische-sync.firebasestorage.app",
+        messagingSenderId: "569166999975",
+        appId: "1:569166999975:web:0413aab6127ce30c758682"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const ROOM_ID = "ubezhische_main";
+    
     let currentUser = null;
     let PLAYERS = [];
     let dates = [];
@@ -39,24 +55,44 @@
     function getWeekday(d) { return WEEKDAYS[d.getDay()]; }
     function generateDates() { let d=[]; let t=new Date(); for(let i=6;i>=0;i--) { let nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
     
-    function saveToLocal() {
-        localStorage.setItem('ubezhische_data', JSON.stringify({
-            players: PLAYERS,
-            dates: dates.map(d=>d.toISOString()),
-            matrix: matrix
-        }));
+    async function saveToFirebase() {
+        try {
+            await db.collection('diaries').doc(ROOM_ID).set({
+                players: PLAYERS,
+                dates: dates.map(d=>d.toISOString()),
+                matrix: matrix,
+                lastUpdated: new Date().toISOString()
+            });
+            document.getElementById('syncStatus') && (document.getElementById('syncStatus').innerHTML = '☁️ Синхронизировано');
+        } catch(e) {
+            console.error('Ошибка сохранения:', e);
+            document.getElementById('syncStatus') && (document.getElementById('syncStatus').innerHTML = '⚠️ Ошибка');
+        }
     }
     
-    function loadFromLocal() {
-        const saved = localStorage.getItem('ubezhische_data');
-        if(saved) {
-            const data = JSON.parse(saved);
-            PLAYERS = data.players || [];
-            dates = (data.dates || []).map(d=>new Date(d));
-            matrix = data.matrix || [];
+    async function loadFromFirebase() {
+        try {
+            const doc = await db.collection('diaries').doc(ROOM_ID).get();
+            if(doc.exists) {
+                const data = doc.data();
+                PLAYERS = data.players || [];
+                dates = (data.dates || []).map(d=>new Date(d));
+                matrix = data.matrix || [];
+                console.log('✅ Загружено из Firebase, игроков:', PLAYERS.length);
+                document.getElementById('syncStatus') && (document.getElementById('syncStatus').innerHTML = '☁️ Синхронизировано');
+            } else {
+                console.log('📭 Новый документ');
+                dates = generateDates();
+                await saveToFirebase();
+            }
+        } catch(e) {
+            console.error('Ошибка загрузки:', e);
+            dates = generateDates();
         }
         if(dates.length===0) dates = generateDates();
-        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) matrix = PLAYERS.map(()=>dates.map(()=>'dash'));
+        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) {
+            matrix = PLAYERS.map(()=>dates.map(()=>'dash'));
+        }
         render();
     }
     
@@ -75,14 +111,14 @@
             document.getElementById('loginBtn').onclick = () => {
                 if(document.getElementById('login').value === 'Clanzlo_' && document.getElementById('password').value === '32707') {
                     currentUser = { login: 'Clanzlo_', role: 'admin' };
-                    loadFromLocal();
+                    loadFromFirebase();
                 } else {
                     document.getElementById('error').innerText = 'Неверный логин или пароль';
                 }
             };
             document.getElementById('guestBtn').onclick = () => {
                 currentUser = { login: 'Наблюдатель', role: 'viewer' };
-                loadFromLocal();
+                loadFromFirebase();
             };
             return;
         }
@@ -91,7 +127,7 @@
         
         let html = `
             <div class="header">
-                <h1>📖 УБЕЖИЩЕ БАЛДЕЖА</h1>
+                <h1>📖 УБЕЖИЩЕ БАЛДЕЖА <span id="syncStatus" class="sync-status">☁️ Загрузка...</span></h1>
                 <div>${currentUser.role === 'admin' ? '👑' : '👀'} ${currentUser.login} <button id="logoutBtn" style="background:rgba(255,255,255,0.3); border:none; color:white; padding:5px 10px;">Выйти</button></div>
             </div>
             <div style="padding:20px;">
@@ -105,17 +141,17 @@
                 ` : ''}
                 <div class="stats">👥 Игроков: ${PLAYERS.length} | 📅 Дней: ${dates.length}</div>
                 <div style="overflow-x:auto;">
-                     <table>
-                        <thead> <tr><th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br>${getWeekday(d)}</th>`).join('')}</tr> </thead>
+                      <table>
+                        <thead>   <th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br>${getWeekday(d)}</th>`).join('')} </thead>
                         <tbody>
                             ${PLAYERS.map((p,i)=>`
-                                <tr>
-                                    <td>${p}</td>
+                                  <tr>
+                                     <td>${p}</td>
                                     ${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}
-                                </tr>
+                                  </tr>
                             `).join('')}
                         </tbody>
-                     </table>
+                      </table>
                 </div>
                 <div style="margin-top:10px; font-size:12px; color:gray;">💡 Кликните по ячейке для изменения статуса</div>
             </div>
@@ -123,48 +159,48 @@
         document.getElementById('app').innerHTML = html;
         
         if(!isViewer) {
-            document.getElementById('addPlayerBtn').onclick = () => {
+            document.getElementById('addPlayerBtn').onclick = async () => {
                 const name = document.getElementById('newPlayer').value.trim();
                 if(!name) return alert('Введите ник');
                 PLAYERS.push(name);
                 matrix.push(dates.map(()=>'dash'));
-                saveToLocal();
+                await saveToFirebase();
                 render();
                 document.getElementById('newPlayer').value = '';
             };
-            document.getElementById('addDayBtn').onclick = () => {
+            document.getElementById('addDayBtn').onclick = async () => {
                 const last = dates[dates.length-1];
                 const newDate = last ? new Date(last) : new Date();
                 if(last) newDate.setDate(last.getDate()+1);
                 dates.push(newDate);
                 PLAYERS.forEach((_,i)=> matrix[i].push('dash'));
-                saveToLocal();
+                await saveToFirebase();
                 render();
             };
-            document.getElementById('removeDayBtn').onclick = () => {
+            document.getElementById('removeDayBtn').onclick = async () => {
                 if(dates.length<=1) return alert('Нельзя удалить последний день');
                 dates.pop();
                 PLAYERS.forEach((_,i)=> matrix[i].pop());
-                saveToLocal();
+                await saveToFirebase();
                 render();
             };
         }
         document.getElementById('logoutBtn').onclick = () => { currentUser=null; render(); };
         
         document.querySelectorAll('td[data-player]').forEach(td => {
-            td.onclick = () => {
+            td.onclick = async () => {
                 const i = parseInt(td.dataset.player);
                 const j = parseInt(td.dataset.day);
                 const current = matrix[i][j];
                 const next = STATUSES[(STATUSES.indexOf(current)+1)%STATUSES.length];
                 matrix[i][j] = next;
-                saveToLocal();
+                await saveToFirebase();
                 render();
             };
         });
     }
     
-    loadFromLocal();
+    loadFromFirebase();
 </script>
 </body>
 </html>
