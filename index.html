@@ -7,147 +7,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
-            font-family: 'Segoe UI', sans-serif;
-            padding: 30px 20px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 4px solid #ffd966;
-        }
-        .header h1 { color: white; font-size: 1.5em; }
-        .user-panel {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        button {
-            background: rgba(255,255,255,0.25);
-            border: none;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-        .stats {
-            background: rgba(255,255,255,0.1);
-            padding: 8px 20px;
-            display: flex;
-            gap: 25px;
-            color: white;
-        }
-        .controls {
-            background: #f8f9fa;
-            padding: 15px 25px;
-            display: flex;
-            gap: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .controls input {
-            padding: 8px 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            width: 180px;
-        }
-        .btn {
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-green { background: #28a745; color: white; }
-        .btn-blue { background: #2a5298; color: white; }
-        .btn-red { background: #dc3545; color: white; }
-        .players-list {
-            background: #f8f9fa;
-            padding: 12px 25px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .player-tag {
-            background: white;
-            padding: 5px 14px;
-            border-radius: 30px;
-            border: 1px solid #dee2e6;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .delete-player {
-            background: none;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-        }
-        .table-wrapper { overflow-x: auto; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; }
-        th { background: #f8f9fa; }
-        td:first-child { text-align: left; font-weight: 600; }
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; text-align: center; }
+        .login-box { max-width: 300px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; }
+        input, button { width: 100%; padding: 8px; margin: 5px 0; }
+        button { background: #2a5298; color: white; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         .status-yes { background: #28a745; color: white; }
         .status-no { background: #dc3545; color: white; }
         .status-vacation { background: #6c757d; color: white; }
         .status-left { background: #343a40; color: white; }
         .status-dash { background: #e9ecef; }
-        .legend {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            display: flex;
-            gap: 20px;
-            font-size: 0.75em;
-            justify-content: center;
-            border-top: 1px solid #dee2e6;
-        }
-        .legend span {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-        .login-box {
-            max-width: 350px;
-            margin: 100px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-        }
-        .login-box input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-        }
+        .header { background: #1e3c72; color: white; padding: 15px; }
     </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyBWR79Gsvhajkd7kctGjqo--7h-E1Ccj9A",
@@ -157,208 +32,96 @@
         messagingSenderId: "1061205311652",
         appId: "1:1061205311652:web:084809c9380ff9032a6631"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const ROOM_ID = "ubezhische_main";
-    
+
     let users = [{ id: "admin_1", login: "Clanzlo_", password: "32707", role: "admin" }];
     let currentUser = null;
-    let PLAYERS = [];
-    let dates = [];
-    let matrix = [];
-    
-    const STATUSES = ['dash', 'yes', 'no', 'vacation', 'left'];
-    const STATUS_NAMES = { dash: '—', yes: 'Да', no: 'Нет', vacation: 'Отпуск', left: 'Выбыл' };
-    const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    
-    function formatDate(d) { return `${d.getDate()}.${d.getMonth()+1}`; }
-    function getWeekday(d) { return WEEKDAYS[d.getDay()]; }
-    function generateDates() { let d=[]; let t=new Date(); for(let i=6;i>=0;i--) { let nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
-    function escapeHtml(t) { let div=document.createElement('div'); div.textContent=t; return div.innerHTML; }
-    
-    async function saveToFirebase() {
-        await db.collection('diaries').doc(ROOM_ID).set({
-            players: PLAYERS,
-            dates: dates.map(d => d.toISOString()),
-            matrix: matrix
-        });
+    let PLAYERS = [], dates = [], matrix = [];
+
+    const STATUSES = ['dash','yes','no','vacation','left'];
+    const STATUS_NAMES = { dash:'—', yes:'Да', no:'Нет', vacation:'Отпуск', left:'Выбыл' };
+    const WEEKDAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+    function formatDate(d){ return `${d.getDate()}.${d.getMonth()+1}`; }
+    function getWeekday(d){ return WEEKDAYS[d.getDay()]; }
+    function generateDates(){ let d=[]; let t=new Date(); for(let i=6;i>=0;i--){ let nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
+    function escapeHtml(t){ let d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+    async function saveToFirebase(){
+        await db.collection('diaries').doc(ROOM_ID).set({ players:PLAYERS, dates:dates.map(d=>d.toISOString()), matrix:matrix });
     }
-    
-    async function loadFromFirebase() {
+    async function loadFromFirebase(){
         const doc = await db.collection('diaries').doc(ROOM_ID).get();
-        if(doc.exists) {
-            const data = doc.data();
+        if(doc.exists){
+            let data = doc.data();
             PLAYERS = data.players || [];
-            dates = (data.dates || []).map(d => new Date(d));
+            dates = (data.dates || []).map(d=>new Date(d));
             matrix = data.matrix || [];
-        } else {
-            dates = generateDates();
-        }
+        } else { dates = generateDates(); }
         if(dates.length===0) dates = generateDates();
-        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) {
-            matrix = PLAYERS.map(() => dates.map(() => 'dash'));
-        }
+        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) matrix = PLAYERS.map(()=>dates.map(()=>'dash'));
         render();
     }
-    
-    function render() {
+
+    function render(){
         let app = document.getElementById('app');
-        if(!currentUser) {
-            app.innerHTML = `
-                <div class="login-box">
-                    <h2>📖 Убежище Балдежа</h2>
-                    <input type="text" id="login" placeholder="Логин">
-                    <input type="password" id="password" placeholder="Пароль">
-                    <button id="loginBtn" style="background:#2a5298; color:white; width:100%; padding:10px; margin:5px 0; border:none; border-radius:10px;">Войти</button>
-                    <button id="guestBtn" style="background:#6c757d; color:white; width:100%; padding:10px; border:none; border-radius:10px;">👀 Наблюдатель</button>
-                    <div id="error" style="color:red; margin-top:10px;"></div>
-                </div>
-            `;
+        if(!currentUser){
+            app.innerHTML = `<div class="login-box"><h2>📖 Убежище Балдежа</h2><input type="text" id="login" placeholder="Логин"><input type="password" id="password" placeholder="Пароль"><button id="loginBtn">Войти</button><button id="guestBtn">👀 Наблюдатель</button><div id="error" style="color:red;"></div></div>`;
             document.getElementById('loginBtn').onclick = async () => {
-                let l = document.getElementById('login').value;
-                let p = document.getElementById('password').value;
-                let u = users.find(u => u.login === l && u.password === p);
-                if(u) {
-                    currentUser = { ...u, password: undefined };
-                    localStorage.setItem('ub_user', JSON.stringify({ id: u.id, login: u.login, role: u.role }));
-                    await loadFromFirebase();
-                } else {
-                    document.getElementById('error').innerText = 'Неверный логин или пароль';
-                }
+                let l=document.getElementById('login').value, p=document.getElementById('password').value;
+                let u=users.find(u=>u.login===l && u.password===p);
+                if(u){ currentUser={...u,password:undefined}; localStorage.setItem('ub_user',JSON.stringify({id:u.id,login:u.login,role:u.role})); await loadFromFirebase(); }
+                else document.getElementById('error').innerText='Неверный логин или пароль';
             };
-            document.getElementById('guestBtn').onclick = async () => {
-                currentUser = { role: 'viewer', login: 'Наблюдатель' };
-                await loadFromFirebase();
-            };
+            document.getElementById('guestBtn').onclick = async () => { currentUser={role:'viewer',login:'Наблюдатель'}; await loadFromFirebase(); };
             return;
         }
-        
         let isViewer = currentUser.role === 'viewer';
         app.innerHTML = `
-            <div class="container">
-                <div class="header">
-                    <h1>📖 УБЕЖИЩЕ БАЛДЕЖА</h1>
-                    <div class="user-panel">
-                        <span>${currentUser.role === 'admin' ? '👑' : '👀'} ${escapeHtml(currentUser.login)}</span>
-                        <button id="logoutBtn">🚪 Выйти</button>
-                    </div>
-                </div>
-                <div class="stats">
-                    <span>👥 Игроков: ${PLAYERS.length}</span>
-                    <span>📅 Дней: ${dates.length}</span>
-                </div>
-                ${!isViewer ? `
-                <div class="controls">
-                    <input type="text" id="newPlayer" placeholder="Никнейм">
-                    <button class="btn btn-green" id="addPlayerBtn">➕ Добавить игрока</button>
-                    <button class="btn btn-blue" id="addDayBtn">+ День</button>
-                    <button class="btn btn-red" id="removeDayBtn">- День</button>
-                </div>
-                ` : ''}
-                <div class="players-list" id="playersList"></div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead id="tableHead"></thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-                <div class="legend">
-                    <div><span style="background:#28a745;"></span> Да</div>
-                    <div><span style="background:#dc3545;"></span> Нет</div>
-                    <div><span style="background:#6c757d;"></span> Отпуск</div>
-                    <div><span style="background:#343a40;"></span> Выбыл</div>
-                    <div><span style="background:#e9ecef;"></span> —</div>
-                </div>
-            </div>
+            <div class="container"><div class="header"><h1>📖 УБЕЖИЩЕ БАЛДЕЖА</h1><div><span>${currentUser.role==='admin'?'👑':'👀'} ${escapeHtml(currentUser.login)}</span> <button id="logoutBtn">Выйти</button></div></div>
+            <div>👥 Игроков: ${PLAYERS.length} | 📅 Дней: ${dates.length}</div>
+            ${!isViewer?`<div><input id="newPlayer" placeholder="Никнейм"><button id="addPlayerBtn">➕ Добавить</button><button id="addDayBtn">+ День</button><button id="removeDayBtn">- День</button></div>`:''}
+            <div id="playersList"></div>
+            <div><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody> </div>
+            <div class="legend"><div><span style="background:#28a745;"></span> Да</div><div><span style="background:#dc3545;"></span> Нет</div><div><span style="background:#6c757d;"></span> Отпуск</div><div><span style="background:#343a40;"></span> Выбыл</div><div><span style="background:#e9ecef;"></span> —</div></div>
         `;
-        
-        if(!isViewer) {
-            document.getElementById('addPlayerBtn').onclick = async () => {
-                let n = document.getElementById('newPlayer').value.trim();
-                if(!n) return alert('Введите ник');
-                PLAYERS.push(n);
-                matrix.push(dates.map(()=>'dash'));
-                await saveToFirebase();
-                render();
-            };
-            document.getElementById('addDayBtn').onclick = async () => {
-                let last = dates[dates.length-1];
-                let nd = last ? new Date(last) : new Date();
-                if(last) nd.setDate(last.getDate()+1);
-                dates.push(nd);
-                PLAYERS.forEach((_,i)=> matrix[i].push('dash'));
-                await saveToFirebase();
-                render();
-            };
-            document.getElementById('removeDayBtn').onclick = async () => {
-                if(dates.length<=1) return alert('Нельзя удалить последний день');
-                dates.pop();
-                PLAYERS.forEach((_,i)=> matrix[i].pop());
-                await saveToFirebase();
-                render();
-            };
+        if(!isViewer){
+            document.getElementById('addPlayerBtn').onclick = async () => { let n=document.getElementById('newPlayer').value.trim(); if(!n) return; PLAYERS.push(n); matrix.push(dates.map(()=>'dash')); await saveToFirebase(); render(); };
+            document.getElementById('addDayBtn').onclick = async () => { let last=dates[dates.length-1]; let nd=last?new Date(last):new Date(); if(last) nd.setDate(last.getDate()+1); dates.push(nd); PLAYERS.forEach((_,i)=>matrix[i].push('dash')); await saveToFirebase(); render(); };
+            document.getElementById('removeDayBtn').onclick = async () => { if(dates.length<=1) return; dates.pop(); PLAYERS.forEach((_,i)=>matrix[i].pop()); await saveToFirebase(); render(); };
         }
-        
-        document.getElementById('logoutBtn').onclick = () => {
-            localStorage.removeItem('ub_user');
-            currentUser = null;
-            render();
-        };
-        
-        renderPlayersList();
-        renderTable();
+        document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('ub_user'); currentUser=null; render(); };
+        renderPlayersList(); renderTable();
         document.getElementById('tableBody').addEventListener('click', handleCellClick);
     }
-    
-    function renderPlayersList() {
-        let c = document.getElementById('playersList');
-        if(!c) return;
-        if(PLAYERS.length===0) { c.innerHTML = '<span>Нет игроков</span>'; return; }
-        c.innerHTML = PLAYERS.map((p,i)=>`<span class="player-tag">${escapeHtml(p)} ${currentUser?.role !== 'viewer' ? '<button class="delete-player" data-index="'+i+'">✖</button>' : ''}</span>`).join('');
-        if(currentUser?.role !== 'viewer') document.querySelectorAll('.delete-player').forEach(btn => { btn.onclick = async () => {
-            if(confirm('Удалить?')) { PLAYERS.splice(parseInt(btn.dataset.index),1); matrix.splice(parseInt(btn.dataset.index),1); await saveToFirebase(); render(); }
-        }; });
+    function renderPlayersList(){
+        let c=document.getElementById('playersList'); if(!c) return;
+        if(PLAYERS.length===0){ c.innerHTML='Нет игроков'; return; }
+        c.innerHTML = PLAYERS.map((p,i)=>`<span>${escapeHtml(p)} ${currentUser?.role!=='viewer'?'<button class="delete-player" data-index="'+i+'">✖</button>':''}</span>`).join('');
+        if(currentUser?.role!=='viewer') document.querySelectorAll('.delete-player').forEach(btn=>{btn.onclick=async()=>{if(confirm('Удалить?')){PLAYERS.splice(parseInt(btn.dataset.index),1); matrix.splice(parseInt(btn.dataset.index),1); await saveToFirebase(); render();}}});
     }
-    
-    function renderTable() {
-        let thead = document.getElementById('tableHead');
-        let tbody = document.getElementById('tableBody');
-        if(!thead || !tbody) return;
+    function renderTable(){
+        let thead=document.getElementById('tableHead'), tbody=document.getElementById('tableBody');
+        if(!thead||!tbody) return;
         thead.innerHTML = `<th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br>${getWeekday(d)}</th>`).join('')}`;
-        if(PLAYERS.length===0) { tbody.innerHTML = `<td colspan="${dates.length+1}">Нет игроков</td>`; return; }
-        tbody.innerHTML = PLAYERS.map((p,i)=>`
-            <tr>
-                <td style="font-weight:600;">${escapeHtml(p)}</td>
-                ${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}
-            </tr>
-        `).join('');
+        if(PLAYERS.length===0){ tbody.innerHTML=`<td colspan="${dates.length+1}">Нет игроков`; return; }
+        tbody.innerHTML = PLAYERS.map((p,i)=>`<tr><td>${escapeHtml(p)}</td>${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}</tr>`).join('');
     }
-    
-    async function handleCellClick(e) {
-        let td = e.target;
-        if(td.tagName !== 'TD' || td.cellIndex===0 || currentUser?.role === 'viewer') return;
-        let pi = parseInt(td.dataset.player);
-        let di = parseInt(td.dataset.day);
+    async function handleCellClick(e){
+        let td=e.target; if(td.tagName!=='TD'||td.cellIndex===0||currentUser?.role==='viewer') return;
+        let pi=parseInt(td.dataset.player), di=parseInt(td.dataset.day);
         if(isNaN(pi)||isNaN(di)) return;
-        let cur = matrix[pi][di];
-        let next = STATUSES[(STATUSES.indexOf(cur)+1) % STATUSES.length];
-        matrix[pi][di] = next;
-        td.className = `status-${next}`;
-        td.textContent = STATUS_NAMES[next];
+        let cur=matrix[pi][di], next=STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length];
+        matrix[pi][di]=next; td.className=`status-${next}`; td.textContent=STATUS_NAMES[next];
         await saveToFirebase();
     }
-    
-    async function loadSession() {
-        let s = localStorage.getItem('ub_user');
-        if(s) {
-            let d = JSON.parse(s);
-            let u = users.find(u=>u.id===d.id);
-            if(u) currentUser = { ...u, password: undefined };
-        }
+    async function loadSession(){
+        let s=localStorage.getItem('ub_user');
+        if(s){ let d=JSON.parse(s); let u=users.find(u=>u.id===d.id); if(u) currentUser={...u,password:undefined}; }
         await loadFromFirebase();
     }
-    
     loadSession();
 </script>
 </body>
