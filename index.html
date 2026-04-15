@@ -2,127 +2,319 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Убежище Балдежа</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>[ERROR] СИСТЕМНЫЙ СБОЙ // ДНЕВНИК АКТИВНОСТЕЙ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; background: #f0f2f5; padding: 20px; text-align: center; }
-        .login-box { max-width: 300px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; }
-        input, button { width: 100%; padding: 8px; margin: 5px 0; }
-        button { background: #2a5298; color: white; border: none; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        .status-yes { background: #28a745; color: white; }
-        .status-no { background: #dc3545; color: white; }
-        .status-vacation { background: #6c757d; color: white; }
-        .status-left { background: #343a40; color: white; }
-        .status-dash { background: #e9ecef; }
-        .header { background: #1e3c72; color: white; padding: 15px; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-primary: #0a0a0a; --bg-secondary: #111111; --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff; --text-secondary: #cccccc; --text-muted: #888888;
+            --error-red: #ff1a1a; --error-dark: #cc0000; --error-bright: #ff4444;
+            --glitch-cyan: #00ffff; --success-green: #00ff00; --warning-yellow: #ffcc00;
+            --border-dim: #333333; --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+            --font-display: 'Share Tech Mono', monospace;
+        }
+        body { font-family:var(--font-mono); background:var(--bg-primary); color:var(--text-primary); min-height:100vh; overflow-x:hidden; position:relative; }
+        .error-background { position:fixed; top:0; left:0; right:0; bottom:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .error-line { position:absolute; color:var(--error-red); opacity:0.1; font-family:var(--font-mono); font-size:12px; white-space:nowrap; animation:scrollError 20s linear infinite; }
+        @keyframes scrollError { 0% { transform:translateX(100vw); } 100% { transform:translateX(-100%); } }
+        .glitch-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 2px, transparent 4px); pointer-events:none; z-index:1; animation:scanlineMove 8s linear infinite; }
+        @keyframes scanlineMove { 0% { transform:translateY(0); } 100% { transform:translateY(10px); } }
+        @keyframes glitch { 0% { transform:translate(0); } 20% { transform:translate(-2px,2px); } 40% { transform:translate(-2px,-2px); } 60% { transform:translate(2px,2px); } 80% { transform:translate(2px,-2px); } 100% { transform:translate(0); } }
+        @keyframes glitchText { 0% { text-shadow:2px 0 var(--error-red), -2px 0 var(--glitch-cyan); } 25% { text-shadow:-2px 0 var(--error-red), 2px 0 var(--glitch-cyan); } 50% { text-shadow:2px 0 var(--glitch-cyan), -2px 0 var(--error-red); } 75% { text-shadow:-2px 0 var(--glitch-cyan), 2px 0 var(--error-red); } 100% { text-shadow:2px 0 var(--error-red), -2px 0 var(--glitch-cyan); } }
+        .app-container { position:relative; z-index:10; max-width:1600px; margin:0 auto; padding:20px; animation:glitch 0.3s ease; }
+        .terminal-card { background:var(--bg-secondary); border:2px solid var(--border-dim); border-radius:0; box-shadow:0 0 20px rgba(255,0,0,0.2), inset 0 0 20px rgba(0,255,255,0.05); position:relative; overflow:hidden; }
+        .terminal-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--error-red), transparent); animation:scanlineMove 4s linear infinite; }
+        .error-header { background:var(--bg-tertiary); border-bottom:3px solid var(--error-red); padding:20px 30px; position:relative; }
+        .error-header h1 { font-family:var(--font-display); font-size:28px; color:var(--error-red); text-transform:uppercase; letter-spacing:2px; animation:glitchText 3s infinite; }
+        .error-header h1::before { content:'[ERRR] '; color:var(--glitch-cyan); }
+        .error-header h1::after { content:' // СИСТЕМНЫЙ СБОЙ'; font-size:14px; color:var(--text-muted); margin-left:10px; }
+        .stats-terminal { display:flex; gap:20px; flex-wrap:wrap; padding:15px 20px; background:var(--bg-tertiary); border:1px solid var(--border-dim); }
+        .stat-block { display:flex; align-items:center; gap:10px; padding:5px 15px; background:var(--bg-primary); border:1px solid var(--border-dim); }
+        .stat-label { color:var(--text-muted); text-transform:uppercase; }
+        .stat-value { color:var(--glitch-cyan); font-weight:bold; }
+        .memory-dump-table { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:13px; }
+        .memory-dump-table th { background:var(--bg-tertiary); color:var(--glitch-cyan); padding:12px; text-align:center; border:1px solid var(--border-dim); text-transform:uppercase; font-weight:bold; position:sticky; top:0; z-index:10; cursor:pointer; }
+        .memory-dump-table th.today-column { border-bottom:3px solid var(--error-red); background:linear-gradient(to bottom, var(--bg-tertiary), rgba(255,0,0,0.1)); position:relative; }
+        .memory-dump-table th.today-column::after { content:''; position:absolute; bottom:4px; right:4px; width:8px; height:8px; border-radius:50%; background:var(--glitch-cyan); box-shadow:0 0 10px var(--glitch-cyan); animation:pulseDot 1.5s infinite; }
+        @keyframes pulseDot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.3); } }
+        .memory-dump-table td { padding:10px; text-align:center; border:1px solid var(--border-dim); cursor:pointer; transition:all 0.15s; background:var(--bg-secondary); position:relative; }
+        .memory-dump-table tr:hover td { background:var(--bg-tertiary) !important; }
+        .memory-dump-table td:first-child { background:var(--bg-tertiary); font-weight:bold; color:var(--warning-yellow); position:sticky; left:0; z-index:5; }
+        .player-cell { position:relative; }
+        .player-cell:hover .delete-player-btn { opacity:1; visibility:visible; }
+        .delete-player-btn { position:absolute; right:5px; top:50%; transform:translateY(-50%); width:20px; height:20px; border-radius:50%; background:var(--error-red); color:white; border:none; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:all 0.2s ease; }
+        .delete-player-btn:hover { background:var(--error-bright); transform:translateY(-50%) scale(1.2); }
+        .memory-dump-table td:not(:first-child):hover { transform:scale(1.05); box-shadow:0 0 15px rgba(0,255,255,0.3); z-index:3; animation:glitch 0.2s; }
+        .status-ERR_YES { background:#003300 !important; color:#00ff00 !important; }
+        .status-ERR_NO { background:#330000 !important; color:#ff0000 !important; }
+        .status-ERR_VAC { background:#1a0033 !important; color:#9900ff !important; }
+        .status-ERR_REPORTED { background:#332200 !important; color:#ffcc00 !important; }
+        .status-ERR_NOT_REPORTED { background:#333333 !important; color:#999999 !important; }
+        .status-ERR_NULL { background:#1a1a1a !important; color:#666666 !important; }
+        .console-popup { position:fixed; background:var(--bg-secondary); border:2px solid var(--error-red); box-shadow:0 0 30px rgba(255,0,0,0.5); padding:15px; z-index:10000; min-width:250px; animation:glitch 0.3s; }
+        .console-popup::before { content:'> СИСТЕМНОЕ МЕНЮ'; display:block; color:var(--glitch-cyan); font-family:var(--font-mono); font-size:12px; margin-bottom:10px; border-bottom:1px solid var(--border-dim); padding-bottom:5px; }
+        .console-option { padding:8px 12px; margin:4px 0; background:var(--bg-tertiary); border:1px solid var(--border-dim); color:var(--text-primary); cursor:pointer; font-family:var(--font-mono); transition:all 0.2s; text-align:left; }
+        .console-option:hover { background:var(--error-dark); border-color:var(--error-bright); transform:translateX(5px); animation:glitch 0.2s; }
+        .error-btn { padding:10px 20px; background:var(--bg-tertiary); border:2px solid var(--border-dim); color:var(--text-primary); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
+        .error-btn:hover { border-color:var(--error-red); box-shadow:0 0 15px rgba(255,0,0,0.3); transform:translateY(-2px); animation:glitch 0.2s; }
+        .tabs-container { display:flex; gap:5px; margin-bottom:-2px; position:relative; z-index:20; }
+        .tab-terminal { padding:12px 24px; background:var(--bg-tertiary); border:2px solid var(--border-dim); border-bottom:none; color:var(--text-muted); font-family:var(--font-mono); text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+        .tab-terminal.active { background:var(--bg-secondary); color:var(--glitch-cyan); border-color:var(--error-red); transform:translateY(-2px); }
+        .tab-content { animation:tabFade 0.2s ease; }
+        .tab-content.hidden { display:none !important; }
+        @keyframes tabFade { from { opacity:0; transform:translateX(-5px); } to { opacity:1; transform:translateX(0); } }
+        .login-screen { max-width:450px; margin:100px auto; background:var(--bg-secondary); border:3px solid var(--error-red); padding:35px; text-align:center; box-shadow:0 0 50px rgba(255,0,0,0.3); animation:glitch 0.5s; }
+        .login-screen h2 { color:var(--error-red); font-family:var(--font-display); margin-bottom:20px; text-transform:uppercase; animation:glitchText 3s infinite; }
+        .login-input { width:100%; padding:14px; margin:10px 0; background:var(--bg-primary); border:2px solid var(--border-dim); color:var(--text-primary); font-family:var(--font-mono); font-size:1em; outline:none; transition:all 0.3s; }
+        .login-input:focus { border-color:var(--glitch-cyan); box-shadow:0 0 15px rgba(0,255,255,0.4); }
+        .login-input::placeholder { color:var(--text-muted); }
+        .login-btn, .guest-btn { width:100%; padding:14px; border:none; font-size:1em; font-weight:600; cursor:pointer; margin-top:10px; font-family:var(--font-mono); text-transform:uppercase; }
+        .login-btn { background:var(--error-red); color:white; }
+        .guest-btn { background:var(--bg-tertiary); color:var(--text-primary); border:2px solid var(--border-dim); }
+        .toast-container { position:fixed; top:20px; right:20px; z-index:10002; display:flex; flex-direction:column; gap:10px; }
+        .error-toast { padding:15px 20px; background:var(--bg-secondary); border-left:4px solid var(--error-red); color:var(--text-primary); font-family:var(--font-mono); animation:slideIn 0.3s; box-shadow:0 0 20px rgba(255,0,0,0.3); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .history-panel { background:var(--bg-tertiary); border:1px solid var(--border-dim); padding:15px; max-height:500px; overflow-y:auto; }
+        .history-entry { padding:10px; border-bottom:1px solid var(--border-dim); font-size:12px; color:var(--text-secondary); display:flex; justify-content:space-between; align-items:center; }
+        .history-rollback { padding:4px 8px; background:var(--error-dark); border:none; color:white; cursor:pointer; font-family:var(--font-mono); font-size:10px; }
+        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:10001; animation:modalFadeIn 0.2s ease; }
+        .modal-overlay.closing { animation:modalFadeOut 0.2s ease forwards; }
+        @keyframes modalFadeIn { from { opacity:0; backdrop-filter:blur(0); } to { opacity:1; backdrop-filter:blur(5px); } }
+        @keyframes modalFadeOut { from { opacity:1; backdrop-filter:blur(5px); } to { opacity:0; backdrop-filter:blur(0); } }
+        .modal-content { background:var(--bg-secondary); border:3px solid var(--error-red); width:90%; max-width:800px; max-height:80vh; overflow:hidden; display:flex; flex-direction:column; animation:modalSlideIn 0.25s ease; }
+        .modal-content.closing { animation:modalSlideOut 0.25s ease forwards; }
+        @keyframes modalSlideIn { from { transform:translateY(-30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        @keyframes modalSlideOut { from { transform:translateY(0); opacity:1; } to { transform:translateY(30px); opacity:0; } }
+        .modal-header { padding:20px; background:var(--bg-tertiary); border-bottom:2px solid var(--error-red); display:flex; justify-content:space-between; align-items:center; }
+        .virtual-scroll-container { max-height:50vh; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--error-red) var(--bg-tertiary); }
+        .virtual-scroll-container::-webkit-scrollbar { width:8px; }
+        .virtual-scroll-container::-webkit-scrollbar-track { background:var(--bg-tertiary); }
+        .virtual-scroll-container::-webkit-scrollbar-thumb { background:var(--error-red); }
+        .selected-cells { border:3px solid var(--glitch-cyan) !important; box-shadow:0 0 20px rgba(0,255,255,0.5) !important; }
+        .terminal-input { width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-dim); color:var(--text-primary); font-family:var(--font-mono); outline:none; }
+        .terminal-input:focus { border-color:var(--glitch-cyan); box-shadow:0 0 15px rgba(0,255,255,0.4); }
+        .terminal-input::placeholder { color:var(--text-muted); }
+        .calendar-container { padding:20px; background:var(--bg-secondary); }
+        .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+        .calendar-day { padding:15px 5px; text-align:center; background:var(--bg-tertiary); border:1px solid var(--border-dim); cursor:pointer; position:relative; transition:all 0.2s; color:var(--text-primary); font-family:var(--font-mono); }
+        .calendar-day:hover { background:var(--error-dark); transform:scale(1.05); border-color:var(--error-bright); }
+        .calendar-day.today { border:2px solid var(--error-red); background:rgba(255,0,0,0.2); }
+        .calendar-day.today::after { content:''; position:absolute; bottom:4px; right:4px; width:6px; height:6px; border-radius:50%; background:var(--glitch-cyan); box-shadow:0 0 8px var(--glitch-cyan); animation:pulseDot 1.5s infinite; }
+        .event-indicator { display:flex; gap:2px; position:absolute; bottom:2px; left:5px; }
+        .event-dot { width:6px; height:6px; border-radius:50%; }
+        .event-dot.tr { background:#00ff00; }
+        .event-dot.pt { background:#9900ff; }
+        .calendar-photo-attach { position:absolute; top:2px; right:5px; cursor:pointer; font-size:12px; opacity:0.7; transition:all 0.2s; z-index:10; }
+        .calendar-photo-attach:hover { opacity:1; transform:scale(1.2); }
+        .date-photo-attach { position:absolute; top:2px; right:5px; cursor:pointer; font-size:12px; opacity:0.7; transition:all 0.2s; z-index:10; }
+        .date-photo-attach:hover { opacity:1; transform:scale(1.2); }
+        .photo-gallery { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+        .photo-thumb { width:50px; height:50px; object-fit:cover; border:1px solid var(--border-dim); cursor:pointer; }
+        .photo-thumb:hover { border-color:var(--glitch-cyan); }
+        .notes-button { position:fixed; bottom:20px; left:20px; width:50px; height:50px; border-radius:50%; background:var(--error-red); border:2px solid var(--error-bright); color:white; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(255,0,0,0.5); transition:all 0.2s; z-index:1000; }
+        .notes-button:hover { transform:scale(1.1); box-shadow:0 0 30px rgba(255,0,0,0.8); }
+        .notes-panel { position:fixed; bottom:80px; left:20px; width:300px; background:var(--bg-secondary); border:2px solid var(--error-red); padding:15px; box-shadow:0 0 30px rgba(0,0,0,0.8); z-index:999; display:none; }
+        .notes-panel.show { display:block; }
+        .notes-textarea { width:100%; min-height:150px; padding:10px; background:var(--bg-primary); border:1px solid var(--border-dim); color:var(--text-primary); font-family:var(--font-mono); resize:vertical; margin-bottom:10px; }
+        .notes-textarea:focus { border-color:var(--glitch-cyan); outline:none; }
+        .countdown-container { background:var(--bg-tertiary); border:1px solid var(--error-red); padding:10px 15px; margin:10px 20px; display:inline-block; }
+        .countdown-timer { color:var(--glitch-cyan); font-size:18px; font-weight:bold; }
+        .countdown-label { color:var(--text-muted); font-size:12px; }
+        .group-item { display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border-dim); margin-bottom:5px; }
+        .delete-photo-btn { position:absolute; top:-5px; right:-5px; background:var(--error-red); color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; }
+        .file-input { display:none; }
+        @media (max-width:768px) { .app-container { padding:10px; } .error-header h1 { font-size:20px; } .stats-terminal { flex-direction:column; gap:10px; } .tabs-container { overflow-x:auto; } .tab-terminal { padding:10px 15px; font-size:12px; } .memory-dump-table { font-size:11px; } .memory-dump-table th, .memory-dump-table td { padding:8px 4px; } .error-btn { padding:8px 12px; font-size:12px; } .console-popup { min-width:200px; max-width:90vw; } .calendar-day { padding:10px 2px; font-size:12px; } }
     </style>
 </head>
 <body>
+<div class="error-background" id="errorBackground"></div>
+<div class="glitch-overlay"></div>
 <div id="app"></div>
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBWR79Gsvhajkd7kctGjqo--7h-E1Ccj9A",
-        authDomain: "ubezhische-sync-68a8f.firebaseapp.com",
-        projectId: "ubezhische-sync-68a8f",
-        storageBucket: "ubezhische-sync-68a8f.firebasestorage.app",
-        messagingSenderId: "1061205311652",
-        appId: "1:1061205311652:web:084809c9380ff9032a6631"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const ROOM_ID = "ubezhische_main";
-
-    let users = [{ id: "admin_1", login: "Clanzlo_", password: "32707", role: "admin" }];
+(function(){
+    let audioCtx = null, soundEnabled = true;
+    function initAudio() { if(!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+    function playKeySound() { if(!soundEnabled) return; if(!audioCtx) { initAudio(); if(!audioCtx) return; } if(audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.value = 800; gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.05); }
+    function generateErrorBackground() { const bg = document.getElementById('errorBackground'); if(!bg) return; const errors = ['[КРИТ] Паника ядра', '[ОШИБКА] Сегфолт', '[ПРЕД] Переполнение стека']; for(let i=0; i<30; i++) { const line = document.createElement('div'); line.className = 'error-line'; line.textContent = errors[Math.floor(Math.random()*errors.length)]; line.style.top = (i*30)+'px'; line.style.animationDelay = (Math.random()*20)+'s'; bg.appendChild(line); } }
+    function encode(str) { return btoa(encodeURIComponent(str)); }
+    function decode(str) { return decodeURIComponent(atob(str)); }
+    
+    let users = [{ id: "admin_1", login: "Clanzlo_", password: encode("32707"), role: "admin", name: "Clanzlo_", createdAt: new Date().toISOString() }];
     let currentUser = null;
-    let PLAYERS = [], dates = [], matrix = [];
-
-    const STATUSES = ['dash','yes','no','vacation','left'];
-    const STATUS_NAMES = { dash:'—', yes:'Да', no:'Нет', vacation:'Отпуск', left:'Выбыл' };
-    const WEEKDAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-
-    function formatDate(d){ return `${d.getDate()}.${d.getMonth()+1}`; }
-    function getWeekday(d){ return WEEKDAYS[d.getDay()]; }
-    function generateDates(){ let d=[]; let t=new Date(); for(let i=6;i>=0;i--){ let nd=new Date(t); nd.setDate(t.getDate()-i); d.push(nd); } return d; }
-    function escapeHtml(t){ let d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-
-    async function saveToFirebase(){
-        await db.collection('diaries').doc(ROOM_ID).set({ players:PLAYERS, dates:dates.map(d=>d.toISOString()), matrix:matrix });
+    let groups = { 'default': { name: 'ОСНОВНАЯ', players: [], matrix: [], dates: [], dateNotes: {}, photos: {} } };
+    let currentGroup = 'default';
+    let PLAYERS = [], dates = [], matrix = [], dateNotes = {}, datePhotos = {};
+    let actionLog = []; let searchTerm = ''; let selectedCells = new Set(); let activePopup = null;
+    let globalNotes = localStorage.getItem('error_global_notes') || '';
+    let calendarDisplayMonth = new Date().getMonth(), calendarDisplayYear = new Date().getFullYear();
+    
+    const STATUS_MAP = { dash: { display:'ПУСТО', full:'[ПУСТО] НЕТ ДАННЫХ', class:'ERR_NULL' }, yes_was: { display:'БЫЛ', full:'[OK] ПРИСУТСТВОВАЛ', class:'ERR_YES' }, no_was: { display:'НЕ БЫЛ', full:'[ОШБ] ОТСУТСТВОВАЛ', class:'ERR_NO' }, vacation: { display:'ОТПУСК', full:'[ОТП] В ОТПУСКЕ', class:'ERR_VAC' }, yes_reported: { display:'ОТПИС+', full:'[ОТП] ОТПИСАЛСЯ', class:'ERR_REPORTED' }, no_notreported: { display:'ОТПИС-', full:'[ОТП] НЕ ОТПИСАЛСЯ', class:'ERR_NOT_REPORTED' } };
+    const WEEKDAYS = ['ВСК','ПНД','ВТР','СРД','ЧТВ','ПТН','СБТ'];
+    
+    function getDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function isToday(d) { const t = new Date(); return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear(); }
+    function getSeason() { const m = new Date().getMonth(); if(m>=2&&m<=4)return{name:'ВЕСНА',emoji:'🌸'}; if(m>=5&&m<=7)return{name:'ЛЕТО',emoji:'☀️'}; if(m>=8&&m<=10)return{name:'ОСЕНЬ',emoji:'🍂'}; return{name:'ЗИМА',emoji:'❄️'}; }
+    function formatDateTime() { const n=new Date(); const s=getSeason(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')} [${s.name}] ${s.emoji}`; }
+    function formatDate(d) { return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`; }
+    function formatFullDateTime() { const n=new Date(); return `${String(n.getDate()).padStart(2,'0')}.${String(n.getMonth()+1).padStart(2,'0')}.${n.getFullYear()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
+    function showToast(msg, type='ИНФО') { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = 'error-toast'; t.innerHTML = `[${type}] ${msg}`; c.appendChild(t); setTimeout(()=>t.remove(), 3000); }
+    function closePopup() { if(activePopup) { activePopup.remove(); activePopup = null; } if(window._closeHandler) { document.removeEventListener('click', window._closeHandler); window._closeHandler = null; } }
+    function addLog(action, details) { const n = new Date(); const ts = `${String(n.getDate()).padStart(2,'0')}.${String(n.getMonth()+1).padStart(2,'0')} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; actionLog.unshift({ id: Date.now()+Math.random(), action, details, user: currentUser?.login||'ГОСТЬ', time: ts, snapshot: { matrix: JSON.parse(JSON.stringify(matrix)), dates: [...dates], players: [...PLAYERS] } }); if(actionLog.length>100) actionLog = actionLog.slice(0,100); localStorage.setItem('error_journal_log', JSON.stringify(actionLog)); }
+    
+    function loadGroup(gid) { const g = groups[gid]; if(!g) return; PLAYERS = g.players || []; dates = (g.dates || []).map(d => new Date(d)); matrix = g.matrix || []; dateNotes = g.dateNotes || {}; datePhotos = g.photos || {}; currentGroup = gid; if(dates.length===0) { const s=new Date(2025,2,20); dates=Array.from({length:7},(_,i)=>{ const d=new Date(s); d.setDate(s.getDate()+i); return d; }); g.dates=dates; } }
+    function saveCurrentGroup() { groups[currentGroup] = { name: groups[currentGroup].name, players: PLAYERS, dates, matrix, dateNotes, photos: datePhotos }; saveData(); }
+    function saveData() { localStorage.setItem('error_journal_groups', JSON.stringify(groups)); }
+    
+    function switchGroup(gid) { saveCurrentGroup(); loadGroup(gid); renderTable(); renderCalendar(); renderGroupsBar(); showToast(`Группа: ${groups[gid].name}`, 'ГРУППА'); }
+    function createGroup() { const n = prompt('[СОЗДАТЬ] Название группы:'); if(!n) return; const id = 'group_'+Date.now(); groups[id] = { name: n, players: [], matrix: [], dates: [], dateNotes: {}, photos: {} }; saveData(); if(document.getElementById('adminContent')) renderAdmin(); renderGroupsBar(); }
+    function deleteGroup(gid) { if(gid === 'default') { showToast('Нельзя удалить основную группу', 'ОШИБКА'); return; } if(confirm(`Удалить группу "${groups[gid].name}"?`)) { delete groups[gid]; if(currentGroup === gid) { currentGroup = 'default'; loadGroup('default'); } saveData(); renderTable(); renderCalendar(); renderGroupsBar(); if(document.getElementById('adminContent')) renderAdmin(); } }
+    
+    function exportCSV() { let csv = 'Игрок;' + dates.map(d=>formatDate(d)).join(';') + '\n'; PLAYERS.forEach((p,i) => { let r=p+';'; r+=dates.map((_,j)=>STATUS_MAP[matrix[i]?.[j]||'dash'].display).join(';'); csv+=r+'\n'; }); const b = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`group_${groups[currentGroup].name}.csv`; a.click(); showToast('CSV экспортирован', 'ЭКСПОРТ'); }
+    
+    function importFromCSV(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(l => l.trim());
+                if(lines.length < 2) { showToast('Файл пуст', 'ОШИБКА'); return; }
+                const headers = lines[0].split(';');
+                const newDates = [];
+                for(let i = 1; i < headers.length; i++) {
+                    const parts = headers[i].trim().split('.');
+                    if(parts.length === 2) {
+                        const d = new Date(); d.setDate(parseInt(parts[0])); d.setMonth(parseInt(parts[1])-1); d.setHours(0,0,0,0);
+                        newDates.push(d);
+                    }
+                }
+                if(newDates.length === 0) { showToast('Не найдены даты', 'ОШИБКА'); return; }
+                const newPlayers = []; const newMatrix = [];
+                for(let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(';'); if(cols.length < 2) continue;
+                    const name = cols[0].trim(); if(!name) continue;
+                    newPlayers.push(name);
+                    const row = [];
+                    for(let j = 1; j <= newDates.length; j++) {
+                        const val = (cols[j] || '').trim().toLowerCase();
+                        if(val.includes('был')||val==='✅') row.push('yes_was');
+                        else if(val.includes('не был')||val==='❌') row.push('no_was');
+                        else if(val.includes('отп')&&!val.includes('не отп')) row.push('vacation');
+                        else if(val.includes('отпис')||val==='📢') row.push('yes_reported');
+                        else if(val.includes('не отпис')||val==='🔇') row.push('no_notreported');
+                        else row.push('dash');
+                    }
+                    newMatrix.push(row);
+                }
+                if(newPlayers.length === 0) { showToast('Не найдены игроки', 'ОШИБКА'); return; }
+                PLAYERS = newPlayers; dates = newDates; matrix = newMatrix;
+                saveCurrentGroup(); renderTable(); renderCalendar(); renderGroupsBar();
+                showToast(`Импортировано: ${PLAYERS.length} игроков, ${dates.length} дней`, 'ИМПОРТ');
+            } catch(err) { showToast('Ошибка чтения файла', 'ОШИБКА'); }
+        };
+        reader.readAsText(file, 'UTF-8');
     }
-    async function loadFromFirebase(){
-        const doc = await db.collection('diaries').doc(ROOM_ID).get();
-        if(doc.exists){
-            let data = doc.data();
-            PLAYERS = data.players || [];
-            dates = (data.dates || []).map(d=>new Date(d));
-            matrix = data.matrix || [];
-        } else { dates = generateDates(); }
-        if(dates.length===0) dates = generateDates();
-        if(matrix.length!==PLAYERS.length && PLAYERS.length>0) matrix = PLAYERS.map(()=>dates.map(()=>'dash'));
-        render();
+    
+    function renderGroupsBar() { const bar = document.getElementById('groupsBar'); if(!bar) return; bar.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><span style="color:var(--text-muted);">[ГРУППЫ]</span><div class="group-selector" style="display:flex;gap:5px;">${Object.entries(groups).map(([id,g])=>`<div style="display:flex;"><button class="group-btn ${id===currentGroup?'active':''}" data-group="${id}" style="padding:5px 15px;background:var(--bg-primary);border:1px solid var(--border-dim);color:${id===currentGroup?'var(--glitch-cyan)':'var(--text-muted)'};cursor:pointer;">${g.name}</button>${id!=='default'?`<button class="delete-group-btn" data-group="${id}" style="padding:5px 10px;background:var(--error-dark);border:1px solid var(--error-bright);color:white;cursor:pointer;">✖</button>`:''}</div>`).join('')}</div><button class="error-btn" id="newGroupBarBtn">[+ГРУППА]</button><button class="error-btn" id="exportCSVBarBtn">[CSV]</button><button class="error-btn" id="importCSVBarBtn">[📂 ИМПОРТ]</button></div>`; document.querySelectorAll('.group-btn').forEach(b => b.onclick = () => { if(b.dataset.group !== currentGroup) switchGroup(b.dataset.group); }); document.querySelectorAll('.delete-group-btn').forEach(b => b.onclick = (e) => { e.stopPropagation(); deleteGroup(b.dataset.group); }); document.getElementById('newGroupBarBtn').onclick = createGroup; document.getElementById('exportCSVBarBtn').onclick = exportCSV; document.getElementById('importCSVBarBtn').onclick = () => document.getElementById('fileInput').click(); }
+    
+    function renderTable() { const th = document.getElementById('tableHead'), tb = document.getElementById('tableBody'); if(!th||!tb) return; th.innerHTML = `<tr><th>ИГРОК</th>${dates.map((d,i)=> { const key = getDateKey(d); const photos = datePhotos[key] || []; const photoIcon = photos.length > 0 ? `<span class="date-photo-attach" data-date-key="${key}">📎${photos.length}</span>` : ''; return `<th class="${isToday(d)?'today-column':''}" data-date-idx="${i}">${formatDate(d)}<br><small>${WEEKDAYS[d.getDay()]}</small>${dateNotes[key]?`<br><small style="color:${dateNotes[key]==='tr'?'#00ff00':'#9900ff'}">[${dateNotes[key]==='tr'?'ТР':'ПТ'}]</small>`:''}${photoIcon}</th>`; }).join('')}</tr>`; if(PLAYERS.length===0) { tb.innerHTML=`<tr><td colspan="${dates.length+1}" style="text-align:center;padding:40px;">[ПУСТО]</td></tr>`; return; } let idx = PLAYERS.map((_,i)=>i); if(searchTerm) idx = idx.filter(i=>PLAYERS[i].toLowerCase().includes(searchTerm)); tb.innerHTML = idx.map(i=>`<tr><td class="player-cell">${PLAYERS[i]}${currentUser?.role!=='viewer'?`<button class="delete-player-btn" data-player-index="${i}">✖</button>`:''}</td>${dates.map((_,j)=>{ const s=matrix[i]?.[j]||'dash'; const m=STATUS_MAP[s]; return `<td class="status-${m.class}" data-player="${i}" data-day="${j}">${m.display}</td>`; }).join('')}</tr>`).join(''); document.querySelectorAll('.memory-dump-table td:not(:first-child)').forEach(c=>c.onclick=(e)=>handleCellClick(e,c)); document.querySelectorAll('#tableHead th[data-date-idx]').forEach((h,i)=>h.onclick=(e)=>showDateMenu(e,dates[i],i,true)); document.querySelectorAll('.date-photo-attach').forEach(el => { el.onclick = (e) => { e.stopPropagation(); showPhotoUploader(el.dataset.dateKey); }; }); document.querySelectorAll('.delete-player-btn').forEach(btn => { btn.onclick = (e) => { e.stopPropagation(); const idx = parseInt(btn.dataset.playerIndex); deletePlayer(idx); }; }); }
+    
+    function deletePlayer(idx) { const name = PLAYERS[idx]; if(!confirm(`Удалить игрока "${name}"?`)) return; PLAYERS.splice(idx, 1); matrix.splice(idx, 1); saveCurrentGroup(); renderTable(); renderGroupsBar(); addLog('ИГРОК_УДАЛЕН', name); showToast(`Игрок ${name} удалён`, 'УДАЛЕНО'); }
+    function handleCellClick(e, cell) { e.stopPropagation(); if(currentUser?.role==='viewer') return; const p = parseInt(cell.dataset.player), d = parseInt(cell.dataset.day); if(e.shiftKey) { const k=`${p}-${d}`; if(selectedCells.has(k)){ selectedCells.delete(k); cell.classList.remove('selected-cells'); } else { selectedCells.add(k); cell.classList.add('selected-cells'); } showStatusMenu(e,p,d,true); } else showStatusMenu(e,p,d,false); }
+    function showStatusMenu(e, p, d, mass) { closePopup(); const pop = document.createElement('div'); pop.className='console-popup'; pop.style.left = Math.min(e.clientX, window.innerWidth-270)+'px'; pop.style.top = Math.min(e.clientY, window.innerHeight-400)+'px'; if(mass) { pop.innerHTML = `<div style="color:#00ffff;margin-bottom:10px;">> МАССОВО (${selectedCells.size})</div>`; Object.entries(STATUS_MAP).forEach(([k,v])=>{ const b=document.createElement('div'); b.className='console-option'; b.textContent=v.full; b.onclick=(ev)=>{ ev.stopPropagation(); selectedCells.forEach(c=>{ const [pp,dd]=c.split('-').map(Number); if(matrix[pp]&&matrix[pp][dd]!==undefined) matrix[pp][dd]=k; }); selectedCells.clear(); saveCurrentGroup(); renderTable(); closePopup(); }; pop.appendChild(b); }); } else { Object.entries(STATUS_MAP).forEach(([k,v])=>{ const b=document.createElement('div'); b.className='console-option'; b.textContent=v.full; b.onclick=(ev)=>{ ev.stopPropagation(); matrix[p][d]=k; saveCurrentGroup(); renderTable(); closePopup(); }; pop.appendChild(b); }); } document.body.appendChild(pop); activePopup = pop; window._closeHandler = (ev) => { if(activePopup && !activePopup.contains(ev.target)) closePopup(); }; setTimeout(() => document.addEventListener('click', window._closeHandler), 10); }
+    
+    function showDateMenu(e, dateObj, idx, isJournal = false) {
+        e.stopPropagation(); if(currentUser?.role==='viewer') return; closePopup();
+        const pop = document.createElement('div'); pop.className = 'console-popup';
+        pop.style.left = Math.min(e.clientX, window.innerWidth-270)+'px';
+        pop.style.top = Math.min(e.clientY, window.innerHeight-(isJournal?350:300))+'px';
+        pop.innerHTML = `<div style="color:#00ffff;margin-bottom:10px;">> ОПЕРАЦИИ С ДАТОЙ</div>`;
+        const opts = [
+            {l: '[ФОТО] ДОБАВИТЬ ФОТО', a: () => { closePopup(); showPhotoUploader(getDateKey(dateObj)); }},
+            {l: '[ОЧИСТ] УДАЛИТЬ ЗАМЕТКУ', a: () => { setDateNote(dateObj, null); closePopup(); }},
+            {l: '[ТР] ТУРНИР', a: () => { setDateNote(dateObj, 'tr'); closePopup(); }},
+            {l: '[ПТ] ПОТАСОВКА', a: () => { setDateNote(dateObj, 'pt'); closePopup(); }}
+        ];
+        if(isJournal) opts.push({l: '[УДАЛ] УДАЛИТЬ ДЕНЬ', a: () => { removeDay(idx); closePopup(); }});
+        opts.forEach(o => { const b = document.createElement('div'); b.className = 'console-option'; b.textContent = o.l; b.onclick = (ev) => { ev.stopPropagation(); o.a(); }; pop.appendChild(b); });
+        document.body.appendChild(pop); activePopup = pop;
+        window._closeHandler = (ev) => { if(activePopup && !activePopup.contains(ev.target)) closePopup(); };
+        setTimeout(() => document.addEventListener('click', window._closeHandler), 10);
     }
-
-    function render(){
-        let app = document.getElementById('app');
-        if(!currentUser){
-            app.innerHTML = `<div class="login-box"><h2>📖 Убежище Балдежа</h2><input type="text" id="login" placeholder="Логин"><input type="password" id="password" placeholder="Пароль"><button id="loginBtn">Войти</button><button id="guestBtn">👀 Наблюдатель</button><div id="error" style="color:red;"></div></div>`;
-            document.getElementById('loginBtn').onclick = async () => {
-                let l=document.getElementById('login').value, p=document.getElementById('password').value;
-                let u=users.find(u=>u.login===l && u.password===p);
-                if(u){ currentUser={...u,password:undefined}; localStorage.setItem('ub_user',JSON.stringify({id:u.id,login:u.login,role:u.role})); await loadFromFirebase(); }
-                else document.getElementById('error').innerText='Неверный логин или пароль';
-            };
-            document.getElementById('guestBtn').onclick = async () => { currentUser={role:'viewer',login:'Наблюдатель'}; await loadFromFirebase(); };
-            return;
-        }
-        let isViewer = currentUser.role === 'viewer';
-        app.innerHTML = `
-            <div class="container"><div class="header"><h1>📖 УБЕЖИЩЕ БАЛДЕЖА</h1><div><span>${currentUser.role==='admin'?'👑':'👀'} ${escapeHtml(currentUser.login)}</span> <button id="logoutBtn">Выйти</button></div></div>
-            <div>👥 Игроков: ${PLAYERS.length} | 📅 Дней: ${dates.length}</div>
-            ${!isViewer?`<div><input id="newPlayer" placeholder="Никнейм"><button id="addPlayerBtn">➕ Добавить</button><button id="addDayBtn">+ День</button><button id="removeDayBtn">- День</button></div>`:''}
-            <div id="playersList"></div>
-            <div><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody> </div>
-            <div class="legend"><div><span style="background:#28a745;"></span> Да</div><div><span style="background:#dc3545;"></span> Нет</div><div><span style="background:#6c757d;"></span> Отпуск</div><div><span style="background:#343a40;"></span> Выбыл</div><div><span style="background:#e9ecef;"></span> —</div></div>
-        `;
-        if(!isViewer){
-            document.getElementById('addPlayerBtn').onclick = async () => { let n=document.getElementById('newPlayer').value.trim(); if(!n) return; PLAYERS.push(n); matrix.push(dates.map(()=>'dash')); await saveToFirebase(); render(); };
-            document.getElementById('addDayBtn').onclick = async () => { let last=dates[dates.length-1]; let nd=last?new Date(last):new Date(); if(last) nd.setDate(last.getDate()+1); dates.push(nd); PLAYERS.forEach((_,i)=>matrix[i].push('dash')); await saveToFirebase(); render(); };
-            document.getElementById('removeDayBtn').onclick = async () => { if(dates.length<=1) return; dates.pop(); PLAYERS.forEach((_,i)=>matrix[i].pop()); await saveToFirebase(); render(); };
-        }
-        document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('ub_user'); currentUser=null; render(); };
-        renderPlayersList(); renderTable();
-        document.getElementById('tableBody').addEventListener('click', handleCellClick);
+    
+    function setDateNote(d, t) { const k = getDateKey(d); if(t===null) delete dateNotes[k]; else dateNotes[k]=t; saveCurrentGroup(); renderTable(); renderCalendar(); }
+    function addDay() { const l = dates[dates.length-1]; const n = new Date(l); n.setDate(l.getDate()+1); dates.push(n); PLAYERS.forEach((_,i)=>matrix[i].push('dash')); saveCurrentGroup(); renderTable(); renderCalendar(); addLog('ДЕНЬ_ДОБАВЛЕН', formatDate(n)); }
+    function removeDay(i) { if(dates.length<=1) return showToast('Нельзя удалить последний день','ОШИБКА'); const removedDate = formatDate(dates[i]); dates.splice(i,1); PLAYERS.forEach((_,p)=>matrix[p].splice(i,1)); saveCurrentGroup(); renderTable(); renderCalendar(); addLog('ДЕНЬ_УДАЛЕН', removedDate); showToast(`День ${removedDate} удалён`, 'УДАЛЕНО'); }
+    
+    function showPhotoUploader(key) {
+        closePopup(); const pop = document.createElement('div'); pop.className = 'console-popup';
+        pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)'; pop.style.maxWidth = '400px';
+        const photos = datePhotos[key] || [];
+        const renderPhotos = () => {
+            const gallery = pop.querySelector('.photo-gallery'); const currentPhotos = datePhotos[key] || [];
+            gallery.innerHTML = currentPhotos.map((p, i) => `<div style="position:relative;"><img src="${p}" class="photo-thumb" onclick="window.open('${p}')" title="Открыть"><button class="delete-photo-btn" data-key="${key}" data-index="${i}">✖</button></div>`).join('');
+            pop.querySelector('.photo-counter').textContent = `${currentPhotos.length}/3`;
+            pop.querySelector('.upload-section').style.display = currentPhotos.length < 3 ? 'block' : 'none';
+        };
+        pop.innerHTML = `<div style="color:#00ffff;margin-bottom:10px;">> ФОТО (<span class="photo-counter">${photos.length}/3</span>)</div><div class="photo-gallery"></div><div class="upload-section" style="${photos.length < 3 ? '' : 'display:none;'}"><input type="file" id="photoInput" accept="image/*" style="margin-top:10px; color:white;"><button class="error-btn" id="uploadPhotoBtn" style="margin-top:10px; width:100%;">[ЗАГРУЗИТЬ]</button></div>${photos.length >= 3 ? '<div style="color:var(--text-muted);margin-top:10px;">Максимум 3 фото</div>' : ''}<button class="error-btn" id="closePhotoPopup" style="margin-top:10px; width:100%;">[ЗАКРЫТЬ]</button>`;
+        document.body.appendChild(pop); activePopup = pop; renderPhotos();
+        pop.addEventListener('click', (e) => { if(e.target.classList.contains('delete-photo-btn')) { const k = e.target.dataset.key, idx = parseInt(e.target.dataset.index); if(datePhotos[k]) { datePhotos[k].splice(idx, 1); saveCurrentGroup(); renderTable(); renderCalendar(); renderPhotos(); showToast('Фото удалено', 'УДАЛЕНО'); } } });
+        document.getElementById('closePhotoPopup').onclick = () => closePopup();
+        if(photos.length < 3) { document.getElementById('uploadPhotoBtn').onclick = () => { const file = document.getElementById('photoInput').files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (e) => { if(!datePhotos[key]) datePhotos[key] = []; if(datePhotos[key].length >= 3) { showToast('Максимум 3 фото', 'ОШИБКА'); return; } datePhotos[key].push(e.target.result); saveCurrentGroup(); renderTable(); renderCalendar(); renderPhotos(); showToast('Фото добавлено', 'УСПЕШНО'); document.getElementById('photoInput').value = ''; }; reader.readAsDataURL(file); }; }
+        window._closeHandler = (ev) => { if(activePopup && !activePopup.contains(ev.target)) closePopup(); }; setTimeout(() => document.addEventListener('click', window._closeHandler), 10);
     }
-    function renderPlayersList(){
-        let c=document.getElementById('playersList'); if(!c) return;
-        if(PLAYERS.length===0){ c.innerHTML='Нет игроков'; return; }
-        c.innerHTML = PLAYERS.map((p,i)=>`<span>${escapeHtml(p)} ${currentUser?.role!=='viewer'?'<button class="delete-player" data-index="'+i+'">✖</button>':''}</span>`).join('');
-        if(currentUser?.role!=='viewer') document.querySelectorAll('.delete-player').forEach(btn=>{btn.onclick=async()=>{if(confirm('Удалить?')){PLAYERS.splice(parseInt(btn.dataset.index),1); matrix.splice(parseInt(btn.dataset.index),1); await saveToFirebase(); render();}}});
+    
+    function renderCalendar() { const cal = document.getElementById('calendarContent'); if(!cal) return; const year = calendarDisplayYear, month = calendarDisplayMonth; const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month+1, 0); const startDay = firstDay.getDay() || 7; let html = `<div class="calendar-header"><button class="error-btn" id="prevMonthBtn">←</button><span style="color:var(--glitch-cyan);font-size:18px;">${new Date(year,month).toLocaleString('ru',{month:'long',year:'numeric'}).toUpperCase()}</span><button class="error-btn" id="nextMonthBtn">→</button></div><div class="calendar-grid">`; ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'].forEach(d => html += `<div style="color:var(--glitch-cyan);padding:10px;">${d}</div>`); for(let i=1; i<startDay; i++) html += `<div></div>`; for(let d=1; d<=lastDay.getDate(); d++) { const date = new Date(year, month, d); const key = getDateKey(date); const note = dateNotes[key]; const photos = datePhotos[key] || []; const isTodayDate = isToday(date); let classes = 'calendar-day'; if(isTodayDate) classes += ' today'; html += `<div class="${classes}" data-date="${date.toISOString()}">${d}${note ? `<div class="event-indicator"><span class="event-dot ${note}"></span></div>` : ''}${photos.length > 0 ? `<span class="calendar-photo-attach">📎${photos.length}</span>` : ''}</div>`; } html += `</div>`; const events = Object.entries(dateNotes).filter(([k,v])=>v).sort((a,b)=>new Date(a[0])-new Date(b[0])); if(events.length > 0) { const nextEvent = events.find(([k])=>new Date(k) >= new Date()); if(nextEvent) { const eventDate = new Date(nextEvent[0]); const diff = eventDate - new Date(); const days = Math.floor(diff/(1000*60*60*24)); const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60)); const type = nextEvent[1] === 'tr' ? 'ТР' : 'ПТ'; if(days >= 0) html = `<div class="countdown-container"><div class="countdown-label">ДО ${type}:</div><div class="countdown-timer">${days}д ${hours}ч</div></div>` + html; } } cal.innerHTML = html; document.getElementById('prevMonthBtn').onclick = () => { if(month === 0) { calendarDisplayMonth = 11; calendarDisplayYear--; } else calendarDisplayMonth--; renderCalendar(); }; document.getElementById('nextMonthBtn').onclick = () => { if(month === 11) { calendarDisplayMonth = 0; calendarDisplayYear++; } else calendarDisplayMonth++; renderCalendar(); }; cal.querySelectorAll('.calendar-day').forEach(el => { el.onclick = (e) => { const d = new Date(el.dataset.date); showDateMenu(e, d, -1, false); }; }); cal.querySelectorAll('.calendar-photo-attach').forEach(el => { el.onclick = (e) => { e.stopPropagation(); const date = new Date(el.closest('.calendar-day').dataset.date); showPhotoUploader(getDateKey(date)); }; }); }
+    
+    function showHistory() { 
+        const m = document.createElement('div'); m.className = 'modal-overlay'; 
+        m.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>> ИСТОРИЯ</h3><button class="error-btn modal-close">[X]</button></div><div class="history-panel">${actionLog.length===0?'[ПУСТО]':actionLog.map(e=>`<div class="history-entry"><div><span style="color:#00ffff;">[${e.time}]</span> <span style="color:#ff0000;">${e.user}</span> ${e.action}: ${e.details}</div><button class="history-rollback" data-id="${e.id}">[ОТКАТ]</button></div>`).join('')}</div></div>`; 
+        document.body.appendChild(m); 
+        const closeModal = () => { m.classList.add('closing'); m.querySelector('.modal-content').classList.add('closing'); setTimeout(() => m.remove(), 200); };
+        m.querySelector('.modal-close').onclick = closeModal; 
+        m.querySelectorAll('.history-rollback').forEach(b => b.onclick = () => { const e = actionLog.find(x => x.id == b.dataset.id); if(e?.snapshot) { matrix = JSON.parse(JSON.stringify(e.snapshot.matrix)); dates = [...e.snapshot.dates]; PLAYERS = [...e.snapshot.players]; saveCurrentGroup(); renderTable(); renderCalendar(); closeModal(); showToast('Состояние восстановлено', 'ОТКАТ'); } }); 
+        m.onclick = (e) => { if(e.target === m) closeModal(); }; 
     }
-    function renderTable(){
-        let thead=document.getElementById('tableHead'), tbody=document.getElementById('tableBody');
-        if(!thead||!tbody) return;
-        thead.innerHTML = `<th>Игрок</th>${dates.map(d=>`<th>${formatDate(d)}<br>${getWeekday(d)}</th>`).join('')}`;
-        if(PLAYERS.length===0){ tbody.innerHTML=`<td colspan="${dates.length+1}">Нет игроков`; return; }
-        tbody.innerHTML = PLAYERS.map((p,i)=>`<tr><td>${escapeHtml(p)}</td>${dates.map((_,j)=>`<td class="status-${matrix[i]?.[j]||'dash'}" data-player="${i}" data-day="${j}">${STATUS_NAMES[matrix[i]?.[j]||'dash']}</td>`).join('')}</tr>`).join('');
+    
+    function renderAdmin() { const c = document.getElementById('adminContent'); if(!c) return; c.innerHTML = `<h3 style="color:#00ffff;margin-bottom:20px;">> ПОЛЬЗОВАТЕЛИ</h3><table class="memory-dump-table"><thead><tr><th>ID</th><th>ЛОГИН</th><th>РОЛЬ</th><th>СОЗДАН</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody>${users.map(u=>`<tr><td>${u.id}</td><td>${u.login}</td><td><select class="terminal-input role-select" data-id="${u.id}" style="width:auto;"><option ${u.role==='admin'?'selected':''}>admin</option><option ${u.role==='editor'?'selected':''}>editor</option></select></td><td>${u.createdAt?.slice(0,10)||'—'}</td><td><button class="error-btn reset-pass" data-id="${u.id}">[СБРОС]</button><button class="error-btn delete-user" data-id="${u.id}">[УДАЛИТЬ]</button></td></tr>`).join('')}</tbody></table><div style="margin-top:20px;display:flex;gap:10px;"><input type="text" id="newLogin" class="terminal-input" placeholder="ЛОГИН" style="width:150px;"> <input type="password" id="newPass" class="terminal-input" placeholder="ПАРОЛЬ" style="width:150px;"> <select id="newRole" class="terminal-input" style="width:auto;"><option value="editor">РЕДАКТОР</option><option value="admin">АДМИН</option></select> <button class="error-btn" id="createUserBtn">[СОЗДАТЬ]</button></div><h3 style="color:#00ffff;margin:30px 0 20px;">> ГРУППЫ</h3><div>${Object.entries(groups).map(([id,g])=>`<div class="group-item"><span style="flex:1;">${g.name} (${g.players?.length||0} игроков)</span>${id!=='default'?`<button class="error-btn delete-group-admin" data-group="${id}">[УДАЛИТЬ]</button>`:'<span style="color:var(--text-muted);">[ОСНОВНАЯ]</span>'}</div>`).join('')}</div><div style="margin-top:15px;"><button class="error-btn" id="newGroupAdminBtn">[+ СОЗДАТЬ ГРУППУ]</button></div><h3 style="color:#00ffff;margin:30px 0 20px;">> БЭКАП</h3><button class="error-btn" id="manualBackupBtn">[СКАЧАТЬ БЭКАП]</button>`; document.querySelectorAll('.role-select').forEach(s=>s.onchange=()=>{ const u=users.find(x=>x.id===s.dataset.id); if(u&&u.id!==users[0].id){ u.role=s.value; localStorage.setItem('error_journal_users',JSON.stringify(users)); } }); document.querySelectorAll('.reset-pass').forEach(b=>b.onclick=()=>{ const u=users.find(x=>x.id===b.dataset.id); if(u){ const p=prompt('Новый пароль:'); if(p){ u.password=encode(p); localStorage.setItem('error_journal_users',JSON.stringify(users)); showToast('Пароль сброшен'); } } }); document.querySelectorAll('.delete-user').forEach(b=>b.onclick=()=>{ const u=users.find(x=>x.id===b.dataset.id); if(u&&u.id!==users[0].id&&confirm(`Удалить ${u.login}?`)){ users=users.filter(x=>x.id!==u.id); localStorage.setItem('error_journal_users',JSON.stringify(users)); renderAdmin(); } }); document.querySelectorAll('.delete-group-admin').forEach(b=>b.onclick=()=>{ deleteGroup(b.dataset.group); renderAdmin(); }); document.getElementById('createUserBtn').onclick=()=>{ const l=document.getElementById('newLogin').value.trim(), p=document.getElementById('newPass').value, r=document.getElementById('newRole').value; if(!l||!p) return showToast('Логин и пароль обязательны','ОШИБКА'); if(users.find(u=>u.login===l)) return showToast('Пользователь существует','ОШИБКА'); users.push({ id:Date.now().toString(), login:l, password:encode(p), role:r, name:l, createdAt:new Date().toISOString() }); localStorage.setItem('error_journal_users',JSON.stringify(users)); renderAdmin(); }; document.getElementById('newGroupAdminBtn').onclick=()=>{ createGroup(); renderAdmin(); }; document.getElementById('manualBackupBtn').onclick=manualBackup; }
+    
+    function manualBackup() { const blob = new Blob([JSON.stringify({ groups, users, timestamp: new Date().toISOString() }, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `error_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('Бэкап скачан', 'БЭКАП'); }
+    
+    function loadData() { const s = localStorage.getItem('error_journal_groups'); if(s) { groups = JSON.parse(s); Object.values(groups).forEach(g => { g.dates = (g.dates || []).map(d => new Date(d)); g.photos = g.photos || {}; g.dateNotes = g.dateNotes || {}; }); } loadGroup('default'); const l = localStorage.getItem('error_journal_log'); if(l) actionLog = JSON.parse(l); }
+    
+    function render() { 
+        const app = document.getElementById('app'); 
+        if(!currentUser) { 
+            app.innerHTML = `<div class="login-screen"><h2>ДОСТУП К ТЕРМИНАЛУ</h2><input type="text" id="loginInput" class="login-input" placeholder="ЛОГИН"><input type="password" id="passwordInput" class="login-input" placeholder="ПАРОЛЬ"><button class="login-btn" id="loginBtn">[ВОЙТИ]</button><button class="guest-btn" id="guestBtn">[ГОСТЬ]</button><div id="loginError" style="color:#ff0000;margin-top:10px;"></div></div>`; 
+            document.getElementById('loginBtn').onclick=()=>{ initAudio(); const l=document.getElementById('loginInput').value, p=document.getElementById('passwordInput').value; const u=users.find(x=>x.login===l && decode(x.password)===p); if(u){ currentUser={...u,password:undefined}; localStorage.setItem('error_journal_user',JSON.stringify({id:u.id,login:u.login,role:u.role})); loadData(); render(); } else document.getElementById('loginError').innerText='[ОШИБКА] ДОСТУП ЗАПРЕЩЕН'; }; 
+            document.getElementById('guestBtn').onclick=()=>{ currentUser={role:'viewer',login:'ГОСТЬ'}; loadData(); render(); }; 
+            return; 
+        } 
+        const isAdmin = currentUser.role==='admin', isViewer = currentUser.role==='viewer'; 
+        app.innerHTML = `<div class="app-container"><div class="tabs-container"><button class="tab-terminal active" data-tab="journal">[ЖУРНАЛ]</button><button class="tab-terminal" data-tab="calendar">[КАЛЕНДАРЬ]</button>${isAdmin?'<button class="tab-terminal" data-tab="admin">[УПРАВЛЕНИЕ]</button>':''}<button class="tab-terminal" data-tab="history">[ИСТОРИЯ]</button></div><div class="terminal-card"><div class="error-header"><h1>ERROR ЖУРНАЛ</h1><div style="display:flex;justify-content:space-between;margin-top:15px;"><div class="stats-terminal"><div class="stat-block"><span class="stat-label">[ИГРОКИ]</span><span class="stat-value">${PLAYERS.length}</span></div><div class="stat-block"><span class="stat-label">[ДНИ]</span><span class="stat-value">${dates.length}</span></div><div class="stat-block"><span class="stat-label">[СИСТ_ВРЕМЯ]</span><span class="stat-value" id="sysTime">${formatDateTime()}</span></div></div><div style="display:flex; gap:10px;"><button class="error-btn" id="soundToggle">🔊</button><button class="error-btn" id="logoutBtn">[ВЫХОД]</button></div></div></div><div id="groupsBar" class="groups-bar" style="padding:10px 20px;background:var(--bg-tertiary);border-bottom:1px solid var(--border-dim);"></div><input type="file" id="fileInput" class="file-input" accept=".csv"><div id="journalTab" class="tab-content">${!isViewer?`<div style="padding:20px;display:flex;gap:20px;border-bottom:1px solid var(--border-dim);"><input type="text" id="newPlayerName" class="terminal-input" placeholder="ИМЯ_ИГРОКА" style="width:200px;"><button class="error-btn" id="addPlayerBtn">[ДОБАВИТЬ]</button><button class="error-btn" id="addDayBtn">[+ДЕНЬ]</button></div>`:''}<div style="padding:20px;border-bottom:1px solid var(--border-dim);"><input type="text" id="searchInput" class="terminal-input" placeholder="ПОИСК" style="width:200px;"><button class="error-btn" id="searchBtn">[ПОИСК]</button><button class="error-btn" id="clearSearchBtn">[ОЧИСТИТЬ]</button></div><div class="virtual-scroll-container"><table class="memory-dump-table" id="diaryTable"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div><div style="padding:20px;border-top:1px solid var(--border-dim);display:flex;gap:15px;flex-wrap:wrap;">${Object.entries(STATUS_MAP).map(([k,v])=>`<div style="display:flex;align-items:center;gap:5px;"><span class="status-${v.class}" style="padding:5px 10px;">${v.display}</span><span style="color:var(--text-muted);">${v.full}</span></div>`).join('')}</div></div><div id="calendarTab" class="tab-content hidden"><div id="calendarContent" class="calendar-container"></div></div>${isAdmin?'<div id="adminTab" class="tab-content hidden"><div id="adminContent" style="padding:20px;"></div></div>':''}</div></div><div class="notes-button" id="notesToggle">💬</div><div class="notes-panel" id="notesPanel"><textarea class="notes-textarea" id="globalNotes" placeholder="Заметки куратора...">${globalNotes}</textarea><button class="error-btn" id="saveNotesBtn" style="width:100%;">[СОХРАНИТЬ]</button></div>`; 
+        renderGroupsBar(); renderTable(); renderCalendar(); generateErrorBackground(); 
+        document.getElementById('notesToggle').onclick = () => document.getElementById('notesPanel').classList.toggle('show'); 
+        document.getElementById('saveNotesBtn').onclick = () => { globalNotes = document.getElementById('globalNotes').value; localStorage.setItem('error_global_notes', globalNotes); document.getElementById('notesPanel').classList.remove('show'); showToast('Заметки сохранены', 'УСПЕШНО'); }; 
+        document.getElementById('soundToggle').onclick = function() { soundEnabled = !soundEnabled; this.textContent = soundEnabled ? '🔊' : '🔇'; localStorage.setItem('error_sound', soundEnabled); if(soundEnabled) initAudio(); }; 
+        const savedSound = localStorage.getItem('error_sound'); if(savedSound !== null) { soundEnabled = savedSound === 'true'; document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇'; if(soundEnabled) initAudio(); } else { initAudio(); } 
+        document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('error_journal_user'); currentUser = null; render(); }; 
+        document.querySelectorAll('.tab-terminal').forEach(t => t.onclick = () => { document.querySelectorAll('.tab-terminal').forEach(x => x.classList.remove('active')); t.classList.add('active'); const j = document.getElementById('journalTab'), c = document.getElementById('calendarTab'), a = document.getElementById('adminTab'); j.classList.add('hidden'); c.classList.add('hidden'); if(a) a.classList.add('hidden'); if(t.dataset.tab === 'journal') j.classList.remove('hidden'); else if(t.dataset.tab === 'calendar') { c.classList.remove('hidden'); renderCalendar(); } else if(t.dataset.tab === 'admin') { if(a) a.classList.remove('hidden'); renderAdmin(); } else if(t.dataset.tab === 'history') { showHistory(); document.querySelector('[data-tab="journal"]').classList.add('active'); t.classList.remove('active'); j.classList.remove('hidden'); } }); 
+        if(!isViewer) { document.getElementById('addPlayerBtn').onclick = () => { const n = document.getElementById('newPlayerName').value.trim(); if(n) { PLAYERS.push(n); matrix.push(dates.map(() => 'dash')); saveCurrentGroup(); renderTable(); renderGroupsBar(); document.getElementById('newPlayerName').value = ''; addLog('ИГРОК_ДОБАВЛЕН', n); playKeySound(); } }; 
+        document.getElementById('addDayBtn').onclick = () => { addDay(); playKeySound(); }; } 
+        document.getElementById('searchBtn').onclick = () => { searchTerm = document.getElementById('searchInput').value.trim().toLowerCase(); renderTable(); playKeySound(); }; 
+        document.getElementById('clearSearchBtn').onclick = () => { document.getElementById('searchInput').value = ''; searchTerm = ''; renderTable(); playKeySound(); }; 
+        document.querySelectorAll('input').forEach(i => i.addEventListener('keydown', (e) => { if(e.key.length === 1 || e.key === 'Backspace') playKeySound(); })); 
+        setInterval(() => { const e = document.getElementById('sysTime'); if(e) e.textContent = formatDateTime(); }, 1000); 
     }
-    async function handleCellClick(e){
-        let td=e.target; if(td.tagName!=='TD'||td.cellIndex===0||currentUser?.role==='viewer') return;
-        let pi=parseInt(td.dataset.player), di=parseInt(td.dataset.day);
-        if(isNaN(pi)||isNaN(di)) return;
-        let cur=matrix[pi][di], next=STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length];
-        matrix[pi][di]=next; td.className=`status-${next}`; td.textContent=STATUS_NAMES[next];
-        await saveToFirebase();
-    }
-    async function loadSession(){
-        let s=localStorage.getItem('ub_user');
-        if(s){ let d=JSON.parse(s); let u=users.find(u=>u.id===d.id); if(u) currentUser={...u,password:undefined}; }
-        await loadFromFirebase();
-    }
-    loadSession();
+    
+    function loadUsers() { const s = localStorage.getItem('error_journal_users'); if(s) users = JSON.parse(s); }
+    function loadSession() { const s = localStorage.getItem('error_journal_user'); if(s) { const d = JSON.parse(s); const u = users.find(x => x.id === d.id); if(u) currentUser = {...u, password:undefined}; } loadData(); }
+    loadUsers(); loadSession(); render();
+})();
 </script>
 </body>
 </html>
